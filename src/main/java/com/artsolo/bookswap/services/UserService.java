@@ -2,7 +2,9 @@ package com.artsolo.bookswap.services;
 
 import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.repositoryes.UserRepository;
+import org.hibernate.NonUniqueResultException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,17 +16,21 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User addUser(User user) {
-        user.setPoints(0);
-        return userRepository.save(user);
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
     }
 
-    public void updateUser(User user) {
-        userRepository.save(user);
-    }
-
-    public boolean deleteUser(User user) {
-        userRepository.delete(user);
-        return userRepository.findById(user.getId()).isEmpty();
+    public String changeUserActivity(User user) {
+        if (user != null) {
+            if (user.isActivity()) {
+                user.setActivity(false);
+                userRepository.save(user);
+                return "User " + user.getNickname() + " with id " + user.getId() + " was banned";
+            }
+            user.setActivity(true);
+            userRepository.save(user);
+            return "User " + user.getNickname() + " with id " + user.getId() + " was unbanned";
+        }
+        throw new NullPointerException("User cannot be null");
     }
 }

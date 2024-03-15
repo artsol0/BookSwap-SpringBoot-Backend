@@ -3,10 +3,7 @@ package com.artsolo.bookswap.controllers;
 import com.artsolo.bookswap.services.AuthenticationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +32,11 @@ public class AuthenticationController {
                     .message("Something went wrong")
                     .build(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/confirm")
+    public String confirmEmail(@RequestParam("token") String token) {
+        return authenticationService.confirmEmail(token);
     }
 
     @PostMapping("/authenticate")
