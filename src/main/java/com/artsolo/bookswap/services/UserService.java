@@ -28,12 +28,12 @@ public class UserService {
 
     public String changeUserActivity(User user) {
         if (user != null) {
-            if (user.isActivity()) {
-                user.setActivity(false);
+            if (user.getActivity()) {
+                user.setActivity(Boolean.FALSE);
                 userRepository.save(user);
                 return "User " + user.getNickname() + " with id " + user.getId() + " was banned";
             }
-            user.setActivity(true);
+            user.setActivity(Boolean.TRUE);
             userRepository.save(user);
             return "User " + user.getNickname() + " with id " + user.getId() + " was unbanned";
         }

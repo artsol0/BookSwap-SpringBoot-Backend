@@ -2,26 +2,18 @@ package com.artsolo.bookswap.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tokens")
-public class Token {
+@Table(name = "statuses")
+public class Status {
     @Id
-    @Column(name = "token_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "status_id", nullable = false)
     private Long id;
-    private String token;
-    private boolean expired;
-    private boolean revoked;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private String status;
 }

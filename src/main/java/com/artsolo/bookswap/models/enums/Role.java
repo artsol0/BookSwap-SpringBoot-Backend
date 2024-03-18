@@ -1,4 +1,4 @@
-package com.artsolo.bookswap.models;
+package com.artsolo.bookswap.models.enums;
 
 
 public enum Role {

@@ -1,5 +1,6 @@
 package com.artsolo.bookswap.models;
 
+import com.artsolo.bookswap.models.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +10,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -29,16 +32,23 @@ public class User implements UserDetails {
     private String password;
     private Integer points;
     @Lob
-    private byte[] photo;
-    private boolean activity;
+    private Byte[] photo;
+    private Boolean activity;
     @Column(name = "registration_date")
-    private Date registrationDate;
+    private LocalDate registrationDate;
     private String country;
     private String city;
     @Enumerated(EnumType.STRING)
     private Role role;
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Revives> revives;
+    @OneToMany(mappedBy = "user")
+    private Set<Wishlist> wishlist;
+    @OneToMany(mappedBy = "user")
+    private Set<Library> library;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

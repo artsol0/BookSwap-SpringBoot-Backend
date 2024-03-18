@@ -36,7 +36,7 @@ public class UserController {
                         .country(user.getCountry())
                         .city(user.getCity())
                         .registrationDate(user.getRegistrationDate())
-                        .activity(user.isActivity())
+                        .activity(user.getActivity())
                         .role(user.getRole())
                         .build());
             }

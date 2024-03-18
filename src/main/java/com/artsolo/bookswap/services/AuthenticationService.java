@@ -3,22 +3,19 @@ package com.artsolo.bookswap.services;
 import com.artsolo.bookswap.controllers.AuthenticationRequest;
 import com.artsolo.bookswap.controllers.AuthenticationResponse;
 import com.artsolo.bookswap.controllers.RegisterRequest;
-import com.artsolo.bookswap.models.Role;
+import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.models.Token;
 import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.repositoryes.TokenRepository;
 import com.artsolo.bookswap.repositoryes.UserRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Map;
 
 @Service
@@ -46,9 +43,9 @@ public class AuthenticationService {
                     .nickname(request.getNickname())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
-                    .role(Role.ADMINISTRATOR)
-                    .activity(false)
-                    .registrationDate(new Date())
+                    .role(Role.READER)
+                    .activity(Boolean.FALSE)
+                    .registrationDate(LocalDate.now())
                     .points(0)
                     .build();
             var savedUser = userRepository.save(user);
@@ -65,7 +62,7 @@ public class AuthenticationService {
         String email = jwtService.extractEmail(token);
         User user = userRepository.findByEmail(email).orElse(null);
         if (user != null && !jwtService.isTokenExpired(token)) {
-            user.setActivity(true);
+            user.setActivity(Boolean.TRUE);
             userRepository.save(user);
             return "Confirmed";
         }

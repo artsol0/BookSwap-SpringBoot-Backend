@@ -11,17 +11,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tokens")
-public class Token {
-    @Id
-    @Column(name = "token_id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String token;
-    private boolean expired;
-    private boolean revoked;
+@Table(name = "revives")
+public class Revives {
+    @EmbeddedId
+    private CompositeKey reviveId;
+    private Integer rating;
+    private String revive;
 
     @ManyToOne
+    @MapsId("user_id")
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne
+    @MapsId("book_id")
+    @JoinColumn(name = "book_id")
+    private Book book;
 }
