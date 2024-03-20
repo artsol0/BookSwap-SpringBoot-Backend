@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "revives")
-public class Revives {
+public class Revive {
     @EmbeddedId
     private CompositeKey reviveId;
     private Integer rating;

@@ -3,12 +3,15 @@ package com.artsolo.bookswap.services;
 import com.artsolo.bookswap.controllers.BookRequest;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
+import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,16 +22,24 @@ public class BookService {
     private final StatusRepository statusRepository;
     private final LanguageRepository languageRepository;
     private final LibraryService libraryService;
+    private final LibraryRepository libraryRepository;
+    private final WishlistRepository wishlistRepository;
+    private final ReviveRepository reviveRepository;
 
     public BookService(BookRepository bookRepository, GenreRepository genreRepository,
                        QualityRepository qualityRepository, StatusRepository statusRepository,
-                       LanguageRepository languageRepository, LibraryService libraryService) {
+                       LanguageRepository languageRepository, LibraryService libraryService,
+                       LibraryRepository libraryRepository, WishlistRepository wishlistRepository,
+                       ReviveRepository reviveRepository) {
         this.bookRepository = bookRepository;
         this.genreRepository = genreRepository;
         this.qualityRepository = qualityRepository;
         this.statusRepository = statusRepository;
         this.languageRepository = languageRepository;
         this.libraryService = libraryService;
+        this.libraryRepository = libraryRepository;
+        this.wishlistRepository = wishlistRepository;
+        this.reviveRepository = reviveRepository;
     }
 
     public boolean addNewBook(BookRequest bookRequest, Principal currentUser) {
@@ -57,5 +68,18 @@ public class BookService {
 
         Book newBook = bookRepository.save(book);
         return libraryService.addNewBookToUserLibrary(user, newBook);
+    }
+
+    public boolean deleteBookById(Long id) {
+        Book book = bookRepository.findById(id).orElseThrow(() -> new RuntimeException("Book bot found"));
+        CompositeKey compositeKey = new CompositeKey(book.getLibrary().getUser().getId(), book.getId());
+
+        libraryRepository.deleteById(compositeKey);
+        wishlistRepository.deleteById(compositeKey);
+        reviveRepository.deleteById(compositeKey);
+
+        libraryRepository.deleteById(new CompositeKey(book.getId(), book.getLibrary().getUser().getId()));
+        bookRepository.deleteById(book.getId());
+        return !bookRepository.existsById(id);
     }
 }
