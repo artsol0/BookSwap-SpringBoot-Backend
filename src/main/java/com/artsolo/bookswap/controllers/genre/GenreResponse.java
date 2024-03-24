@@ -1,4 +1,4 @@
-package com.artsolo.bookswap.controllers;
+package com.artsolo.bookswap.controllers.genre;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AuthenticationResponse {
-    private String token;
-    private String message;
+public class GenreResponse {
+    private Long id;
+    private String genre;
 }

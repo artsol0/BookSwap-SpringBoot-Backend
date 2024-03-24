@@ -1,17 +1,15 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.BookRequest;
+import com.artsolo.bookswap.controllers.book.BookRequest;
+import com.artsolo.bookswap.controllers.book.BookResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
-import jakarta.transaction.Transactional;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,5 +79,22 @@ public class BookService {
         libraryRepository.deleteById(new CompositeKey(book.getId(), book.getLibrary().getUser().getId()));
         bookRepository.deleteById(book.getId());
         return !bookRepository.existsById(id);
+    }
+
+    public BookResponse getBookById(Long id) {
+        Optional<Book> book = bookRepository.findById(id);
+        BookResponse bookResponse = new BookResponse();
+        if (book.isPresent()) {
+            bookResponse = BookResponse.builder()
+                    .id(book.get().getId())
+                    .title(book.get().getTitle())
+                    .author(book.get().getAuthor())
+                    .genres(book.get().getGenres().stream().map(Genre::getGenre).collect(Collectors.toList()))
+                    .quality(book.get().getQuality().getQuality())
+                    .status(book.get().getStatus().getStatus())
+                    .language(book.get().getLanguage().getLanguage())
+                    .build();
+        }
+        return bookResponse;
     }
 }

@@ -1,4 +1,4 @@
-package com.artsolo.bookswap.controllers;
+package com.artsolo.bookswap.controllers.book;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,11 +11,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BookRequest {
+public class BookResponse {
+    private Long id;
     private String title;
     private String author;
-    private List<Long> genreIds;
-    private Long qualityId;
-    private Long statusId;
-    private Long languageId;
+    private List<String> genres;
+    private String quality;
+    private String status;
+    private String language;
 }

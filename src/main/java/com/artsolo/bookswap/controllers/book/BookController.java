@@ -1,4 +1,4 @@
-package com.artsolo.bookswap.controllers;
+package com.artsolo.bookswap.controllers.book;
 
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.LibraryService;
@@ -41,5 +41,13 @@ public class BookController {
         }
     }
 
+    @GetMapping("/get/{id}")
+    public ResponseEntity<?> getBookById(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok().body(bookService.getBookById(id));
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Something want wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }

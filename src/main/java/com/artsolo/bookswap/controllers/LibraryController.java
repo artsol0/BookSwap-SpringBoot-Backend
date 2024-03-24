@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -37,6 +38,15 @@ public class LibraryController {
             return ResponseEntity.ok("failed");
         } catch (Exception e) {
             return new ResponseEntity<String>("Something want wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/get-books")
+    public ResponseEntity<?> getAllWishlistBooks(Principal currentUser) {
+        try {
+            return ResponseEntity.ok().body(libraryService.getAllWishlistBooks(currentUser));
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

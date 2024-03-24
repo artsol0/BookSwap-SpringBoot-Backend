@@ -1,8 +1,8 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.AuthenticationRequest;
-import com.artsolo.bookswap.controllers.AuthenticationResponse;
-import com.artsolo.bookswap.controllers.RegisterRequest;
+import com.artsolo.bookswap.controllers.auth.AuthenticationRequest;
+import com.artsolo.bookswap.controllers.auth.AuthenticationResponse;
+import com.artsolo.bookswap.controllers.auth.RegisterRequest;
 import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.models.Token;
 import com.artsolo.bookswap.models.User;

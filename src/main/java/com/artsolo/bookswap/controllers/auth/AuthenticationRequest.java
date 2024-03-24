@@ -1,4 +1,4 @@
-package com.artsolo.bookswap.controllers;
+package com.artsolo.bookswap.controllers.auth;
 
 public class AuthenticationRequest {
     String email;

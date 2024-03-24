@@ -1,4 +1,4 @@
-package com.artsolo.bookswap.controllers;
+package com.artsolo.bookswap.controllers.auth;
 
 import com.artsolo.bookswap.services.AuthenticationService;
 import com.artsolo.bookswap.services.JwtService;

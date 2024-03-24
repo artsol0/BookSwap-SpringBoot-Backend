@@ -1,15 +1,12 @@
-package com.artsolo.bookswap.controllers;
+package com.artsolo.bookswap.controllers.auth;
 
 import com.artsolo.bookswap.services.AuthenticationService;
 import com.artsolo.bookswap.services.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")

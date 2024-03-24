@@ -16,7 +16,7 @@ public class WishlistController {
         this.wishlistService = wishlistService;
     }
 
-    @PostMapping("/add/{id}")
+    @PostMapping("/add-book/{id}")
     public ResponseEntity<String> addBookToWishlist(@PathVariable Long id, Principal currentUser) {
         try {
             if (wishlistService.addBookToWishlist(id, currentUser)) {
@@ -28,13 +28,22 @@ public class WishlistController {
         }
     }
 
-    @DeleteMapping("/remove/{id}")
+    @DeleteMapping("/remove-book/{id}")
     public ResponseEntity<String> removeBookFromWishlist(@PathVariable Long id, Principal currentUser) {
         try {
             if (wishlistService.removeBookFromWishlist(id, currentUser)) {
                 return ResponseEntity.ok("Book removed from wishlist");
             }
             return ResponseEntity.badRequest().body("Requested data was not presented in the database");
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/get-books")
+    public ResponseEntity<?> getAllWishlistBooks(Principal currentUser) {
+        try {
+            return ResponseEntity.ok().body(wishlistService.getAllWishlistBooks(currentUser));
         } catch (Exception e) {
             return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
         }

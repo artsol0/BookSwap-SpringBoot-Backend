@@ -1,16 +1,16 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.BookRequest;
-import com.artsolo.bookswap.models.Book;
-import com.artsolo.bookswap.models.CompositeKey;
-import com.artsolo.bookswap.models.User;
-import com.artsolo.bookswap.models.Wishlist;
+import com.artsolo.bookswap.controllers.book.BookResponse;
+import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.BookRepository;
 import com.artsolo.bookswap.repositoryes.WishlistRepository;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class WishlistService {
@@ -44,5 +44,23 @@ public class WishlistService {
             return !wishlistRepository.existsById(compositeKey);
         }
         return false;
+    }
+
+    public List<BookResponse> getAllWishlistBooks(Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        List<Wishlist> wishlists = wishlistRepository.findByUserId(user.getId());
+        List<BookResponse> bookResponses = new ArrayList<>();
+        for (Wishlist wishlist : wishlists) {
+            bookResponses.add(BookResponse.builder()
+                            .id(wishlist.getBook().getId())
+                            .title(wishlist.getBook().getTitle())
+                            .author(wishlist.getBook().getAuthor())
+                            .genres(wishlist.getBook().getGenres().stream().map(Genre::getGenre).collect(Collectors.toList()))
+                            .quality(wishlist.getBook().getQuality().getQuality())
+                            .status(wishlist.getBook().getStatus().getStatus())
+                            .language(wishlist.getBook().getLanguage().getLanguage())
+                            .build());
+        }
+        return bookResponses;
     }
 }
