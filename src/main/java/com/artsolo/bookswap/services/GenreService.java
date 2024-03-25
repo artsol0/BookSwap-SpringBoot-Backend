@@ -1,6 +1,5 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.genre.GenreResponse;
 import com.artsolo.bookswap.models.Genre;
 import com.artsolo.bookswap.repositoryes.GenreRepository;
 import org.springframework.stereotype.Service;
@@ -37,12 +36,5 @@ public class GenreService {
         return genreRepository.findById(id).orElse(null);
     }
 
-    public List<GenreResponse> getAllGenres() {
-        List<Genre> genres = genreRepository.findAll();
-        List<GenreResponse> genreResponses = new ArrayList<>();
-        for (Genre genre : genres) {
-            genreResponses.add(GenreResponse.builder().id(genre.getId()).genre(genre.getGenre()).build());
-        }
-        return genreResponses;
-    }
+    public List<Genre> getAllGenres() {return genreRepository.findAll();}
 }

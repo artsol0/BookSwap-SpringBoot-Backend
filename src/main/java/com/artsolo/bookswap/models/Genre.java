@@ -20,7 +20,4 @@ public class Genre {
     @Column(name = "genre_id", nullable = false)
     private Long id;
     private String genre;
-
-    @ManyToMany(mappedBy = "genres")
-    private List<Book> books;
 }

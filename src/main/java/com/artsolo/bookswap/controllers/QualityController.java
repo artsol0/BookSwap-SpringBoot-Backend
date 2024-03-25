@@ -1,30 +1,27 @@
-package com.artsolo.bookswap.controllers.genre;
+package com.artsolo.bookswap.controllers;
 
-import com.artsolo.bookswap.models.Genre;
-import com.artsolo.bookswap.services.GenreService;
+import com.artsolo.bookswap.models.Quality;
+import com.artsolo.bookswap.services.QualityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/genre")
-public class GenreController {
-    private final GenreService genreService;
+@RequestMapping("/api/v1/quality")
+public class QualityController {
+    private final QualityService qualityService;
 
-    public GenreController(GenreService genreService) {
-        this.genreService = genreService;
+    public QualityController(QualityService qualityService) {
+        this.qualityService = qualityService;
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addNewGenre(@RequestBody Map<String, String> request) {
+    public ResponseEntity<String> addNewStatus(@RequestBody Map<String, String> request) {
         try {
-            if (genreService.addNewGenre(request.get("genre"))) {
-                return ResponseEntity.ok("New genre added");
+            if (qualityService.addNewQuality(request.get("quality"))) {
+                return ResponseEntity.ok("New quality added");
             }
             return ResponseEntity.badRequest().body("Requested data was not presented in the database");
         } catch (Exception e) {
@@ -33,10 +30,10 @@ public class GenreController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteGenreById(@PathVariable Long id) {
+    public ResponseEntity<String> deleteQualityById(@PathVariable Long id) {
         try {
-            if (genreService.deleteGenreById(id)) {
-                return ResponseEntity.ok("Genre was deleted");
+            if (qualityService.deleteQualityById(id)) {
+                return ResponseEntity.ok("Quality was deleted");
             }
             return ResponseEntity.badRequest().body("Requested data was not presented in the database");
         } catch (Exception e) {
@@ -45,11 +42,11 @@ public class GenreController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getGenreById(@PathVariable Long id) {
+    public ResponseEntity<?> getQualityById(@PathVariable Long id) {
         try {
-            Genre genre = genreService.getGenreById(id);
-            if (genre != null) {
-                return ResponseEntity.ok().body(genre);
+            Quality quality = qualityService.getQualityById(id);
+            if (quality != null) {
+                return ResponseEntity.ok().body(quality);
             }
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
@@ -58,9 +55,9 @@ public class GenreController {
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<?> getAllGenres() {
+    public ResponseEntity<?> getAllStatuses() {
         try {
-            return ResponseEntity.ok().body(genreService.getAllGenres());
+            return ResponseEntity.ok().body(qualityService.getAllQualities());
         } catch (Exception e) {
             return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
         }
