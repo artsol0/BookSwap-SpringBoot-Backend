@@ -44,7 +44,7 @@ public class LibraryController {
     @GetMapping("/get-books")
     public ResponseEntity<?> getAllWishlistBooks(Principal currentUser) {
         try {
-            return ResponseEntity.ok().body(libraryService.getAllWishlistBooks(currentUser));
+            return ResponseEntity.ok().body(libraryService.getAllLibraryBooks(currentUser));
         } catch (Exception e) {
             return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
         }

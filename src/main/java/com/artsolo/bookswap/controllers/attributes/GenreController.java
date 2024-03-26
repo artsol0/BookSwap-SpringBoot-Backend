@@ -1,4 +1,4 @@
-package com.artsolo.bookswap.controllers.genre;
+package com.artsolo.bookswap.controllers.attributes;
 
 import com.artsolo.bookswap.models.Genre;
 import com.artsolo.bookswap.services.GenreService;

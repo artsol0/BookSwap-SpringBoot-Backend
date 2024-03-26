@@ -38,8 +38,8 @@ public class PasswordForgotController {
     @PostMapping("/reset-password")
     public String updatePassword(@RequestParam("token") String token, @RequestParam("password") String newPassword) {
         if (authenticationService.resetPassword(token, newPassword)) {
-            return "password-rest";
+            return "password-reset";
         }
-        return "password-not-rest";
+        return "password-not-reset";
     }
 }

@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 import java.util.Set;
@@ -45,10 +43,10 @@ public class Book {
     private Language language;
 
     @Lob
-    private Byte[] photo;
+    private byte[] photo;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Revive> revives;
+    private List<Review> reviews;
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Wishlist> wishlist;
     @OneToOne(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)

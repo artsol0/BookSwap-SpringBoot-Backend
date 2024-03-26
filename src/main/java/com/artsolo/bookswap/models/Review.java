@@ -7,16 +7,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
-@Table(name = "revives")
-public class Revive {
+@Table(name = "reviews")
+public class Review {
     @EmbeddedId
-    private CompositeKey reviveId;
+    private CompositeKey reviewId;
     private Integer rating;
-    private String revive;
+    private String review;
 
     @ManyToOne
     @MapsId("user_id")

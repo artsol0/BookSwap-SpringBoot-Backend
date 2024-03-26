@@ -1,4 +1,4 @@
-package com.artsolo.bookswap.controllers;
+package com.artsolo.bookswap.controllers.attributes;
 
 import com.artsolo.bookswap.models.Quality;
 import com.artsolo.bookswap.services.QualityService;

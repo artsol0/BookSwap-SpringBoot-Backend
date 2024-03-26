@@ -57,7 +57,7 @@ public class LibraryService {
         return false;
     }
 
-    public List<BookResponse> getAllWishlistBooks(Principal currentUser) {
+    public List<BookResponse> getAllLibraryBooks(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         List<Library> libraries = libraryRepository.findByUserId(user.getId());
         List<BookResponse> bookResponses = new ArrayList<>();

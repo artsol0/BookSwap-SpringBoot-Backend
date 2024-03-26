@@ -1,8 +1,7 @@
-package com.artsolo.bookswap.controllers;
+package com.artsolo.bookswap.controllers.attributes;
 
 import com.artsolo.bookswap.models.Language;
-import com.artsolo.bookswap.models.Status;
-import com.artsolo.bookswap.services.StatusService;
+import com.artsolo.bookswap.services.LanguageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,19 +9,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/status")
-public class StatusController {
-    public final StatusService statusService;
+@RequestMapping("/api/v1/language")
+public class LanguageController {
+    private final LanguageService languageService;
 
-    public StatusController(StatusService statusService) {
-        this.statusService = statusService;
+    public LanguageController(LanguageService languageService) {
+        this.languageService = languageService;
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addNewStatus(@RequestBody Map<String, String> request) {
+    public ResponseEntity<String> addNewLanguage(@RequestBody Map<String, String> request) {
         try {
-            if (statusService.addNewStatus(request.get("status"))) {
-                return ResponseEntity.ok("New status added");
+            if (languageService.addNewLanguage(request.get("language"))) {
+                return ResponseEntity.ok("New language added");
             }
             return ResponseEntity.badRequest().body("Requested data was not presented in the database");
         } catch (Exception e) {
@@ -31,10 +30,10 @@ public class StatusController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteStatusById(@PathVariable Long id) {
+    public ResponseEntity<String> deleteLanguageById(@PathVariable Long id) {
         try {
-            if (statusService.deleteStatusById(id)) {
-                return ResponseEntity.ok("Status was deleted");
+            if (languageService.deleteLanguageById(id)) {
+                return ResponseEntity.ok("Language was deleted");
             }
             return ResponseEntity.badRequest().body("Requested data was not presented in the database");
         } catch (Exception e) {
@@ -43,11 +42,11 @@ public class StatusController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getStatusById(@PathVariable Long id) {
+    public ResponseEntity<?> getLanguageById(@PathVariable Long id) {
         try {
-            Status status = statusService.getStatusById(id);
-            if (status != null) {
-                return ResponseEntity.ok().body(status);
+            Language language = languageService.getLanguageById(id);
+            if (language != null) {
+                return ResponseEntity.ok().body(language);
             }
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
@@ -56,11 +55,12 @@ public class StatusController {
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<?> getAllStatuses() {
+    public ResponseEntity<?> getAllLanguages() {
         try {
-            return ResponseEntity.ok().body(statusService.getAllStatuses());
+            return ResponseEntity.ok().body(languageService.getAllLanguages());
         } catch (Exception e) {
             return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

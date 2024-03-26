@@ -6,7 +6,9 @@ import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -22,13 +24,13 @@ public class BookService {
     private final LibraryService libraryService;
     private final LibraryRepository libraryRepository;
     private final WishlistRepository wishlistRepository;
-    private final ReviveRepository reviveRepository;
+    private final ReviewRepository reviewRepository;
 
     public BookService(BookRepository bookRepository, GenreRepository genreRepository,
                        QualityRepository qualityRepository, StatusRepository statusRepository,
                        LanguageRepository languageRepository, LibraryService libraryService,
                        LibraryRepository libraryRepository, WishlistRepository wishlistRepository,
-                       ReviveRepository reviveRepository) {
+                       ReviewRepository reviewRepository) {
         this.bookRepository = bookRepository;
         this.genreRepository = genreRepository;
         this.qualityRepository = qualityRepository;
@@ -37,7 +39,7 @@ public class BookService {
         this.libraryService = libraryService;
         this.libraryRepository = libraryRepository;
         this.wishlistRepository = wishlistRepository;
-        this.reviveRepository = reviveRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     public boolean addNewBook(BookRequest bookRequest, Principal currentUser) {
@@ -74,7 +76,7 @@ public class BookService {
 
         libraryRepository.deleteById(compositeKey);
         wishlistRepository.deleteById(compositeKey);
-        reviveRepository.deleteById(compositeKey);
+        reviewRepository.deleteById(compositeKey);
 
         libraryRepository.deleteById(new CompositeKey(book.getId(), book.getLibrary().getUser().getId()));
         bookRepository.deleteById(book.getId());
