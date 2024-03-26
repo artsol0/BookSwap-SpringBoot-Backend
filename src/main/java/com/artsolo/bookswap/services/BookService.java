@@ -6,6 +6,7 @@ import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class BookService {
         this.reviewRepository = reviewRepository;
     }
 
-    public boolean addNewBook(BookRequest bookRequest, Principal currentUser) {
+    public boolean addNewBook(BookRequest bookRequest, Principal currentUser) throws IOException {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
 
         List<Genre> genres = bookRequest.getGenreIds().stream().map(genreId -> genreRepository.findById(genreId)
@@ -57,6 +58,8 @@ public class BookService {
         Language language = languageRepository.findById(bookRequest.getLanguageId())
                 .orElseThrow(() -> new RuntimeException("Language not found"));
 
+        byte[] photo = bookRequest.getPhoto().getBytes();
+
         Book book = Book.builder()
                 .title(bookRequest.getTitle())
                 .author(bookRequest.getAuthor())
@@ -64,6 +67,7 @@ public class BookService {
                 .quality(quality)
                 .status(status)
                 .language(language)
+                .photo(photo)
                 .build();
 
         Book newBook = bookRepository.save(book);

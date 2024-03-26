@@ -23,7 +23,7 @@ public class BookController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addNewBook(@RequestBody BookRequest request, Principal currentUser) {
+    public ResponseEntity<String> addNewBook(@ModelAttribute BookRequest request, Principal currentUser) {
         try {
             if (bookService.addNewBook(request, currentUser)) {
                 return ResponseEntity.ok("Book added");

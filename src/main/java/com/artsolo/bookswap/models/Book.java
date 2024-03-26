@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Blob;
 import java.util.List;
 import java.util.Set;
 
@@ -43,6 +44,7 @@ public class Book {
     private Language language;
 
     @Lob
+    @Column(columnDefinition="BLOB")
     private byte[] photo;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
