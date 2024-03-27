@@ -99,8 +99,14 @@ public class BookService {
                     .quality(book.get().getQuality().getQuality())
                     .status(book.get().getStatus().getStatus())
                     .language(book.get().getLanguage().getLanguage())
+                    .photo(book.get().getPhoto())
                     .build();
         }
         return bookResponse;
+    }
+
+    public byte[] getBookPhoto(Long id) {
+        Optional<Book> book = bookRepository.findById(id);
+        return book.map(Book::getPhoto).orElse(null);
     }
 }

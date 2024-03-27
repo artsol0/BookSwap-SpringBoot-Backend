@@ -37,7 +37,7 @@ public class AuthenticationService {
         this.emailSender = emailSender;
     }
 
-    public String register(RegisterRequest request) {
+    public boolean register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isEmpty()) {
             var user = User.builder()
                     .nickname(request.getNickname())
@@ -53,9 +53,9 @@ public class AuthenticationService {
             saveUserToken(savedUser, jvtToken);
             String link = "http://localhost:8080/api/v1/auth/confirm?token=" + jvtToken;
             emailSender.send(savedUser.getEmail(), "Confirm your email", buildConfirmText(user.getNickname(), link));
-            return "Success";
+            return true;
         }
-        return "Email " + request.getEmail() + " is already taken";
+        return false;
     }
 
     public String confirmEmail(String token) {
@@ -80,7 +80,6 @@ public class AuthenticationService {
             );
         } catch (AuthenticationException e) {
             return AuthenticationResponse.builder()
-                    .message("Invalid credentials")
                     .build();
         }
 
@@ -92,7 +91,6 @@ public class AuthenticationService {
         saveUserToken(user, jvtToken);
         return AuthenticationResponse.builder()
                 .token(jvtToken)
-                .message("Successes")
                 .build();
     }
 

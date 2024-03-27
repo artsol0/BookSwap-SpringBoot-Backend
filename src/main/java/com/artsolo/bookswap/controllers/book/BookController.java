@@ -5,6 +5,7 @@ import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.LibraryService;
 import com.artsolo.bookswap.services.ReviewService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +51,15 @@ public class BookController {
     public ResponseEntity<?> getBookById(@PathVariable Long id) {
         try {
             return ResponseEntity.ok().body(bookService.getBookById(id));
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/photo")
+    public ResponseEntity<?> getBookPhoto(@RequestParam("id") Long id) {
+        try {
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(bookService.getBookPhoto(id));
         } catch (Exception e) {
             return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
         }

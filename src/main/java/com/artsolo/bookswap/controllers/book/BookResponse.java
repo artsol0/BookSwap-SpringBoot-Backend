@@ -19,4 +19,5 @@ public class BookResponse {
     private String quality;
     private String status;
     private String language;
+    private byte[] photo;
 }

@@ -1,4 +1,4 @@
-package com.artsolo.bookswap.controllers.auth;
+package com.artsolo.bookswap.controllers.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AuthenticationResponse {
-    private String token;
+public class SuccessResponse<T> {
+    private T data;
 }

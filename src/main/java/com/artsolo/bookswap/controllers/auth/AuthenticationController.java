@@ -1,5 +1,8 @@
 package com.artsolo.bookswap.controllers.auth;
 
+import com.artsolo.bookswap.controllers.responses.ErrorDescription;
+import com.artsolo.bookswap.controllers.responses.ErrorResponse;
+import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.services.AuthenticationService;
 import com.artsolo.bookswap.services.JwtService;
 import org.springframework.http.HttpStatus;
@@ -19,15 +22,20 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             if (request.getNickname() != null && request.getEmail() != null && request.getPassword() != null) {
-                return ResponseEntity.ok(authenticationService.register(request));
+                if (authenticationService.register(request)) {
+                    return ResponseEntity.ok().body(new SuccessResponse<>("User registered successfully"));
+                }
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(
+                        new ErrorDescription(409, "Email address is already taken")));
             }
-            return ResponseEntity.badRequest().body("Invalid data");
+            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(400, "Bad request")));
         } catch (Exception e) {
             logger.error("Error occurred during registration", e);
-            return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse(new ErrorDescription(501, "Internal server error")));
         }
     }
 
@@ -37,19 +45,20 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
         try {
             if (request.getEmail() != null && request.getPassword() != null) {
-                return ResponseEntity.ok(authenticationService.authenticate(request));
+                AuthenticationResponse authenticationResponse = authenticationService.authenticate(request);
+                if (authenticationResponse.getToken() != null && !authenticationResponse.getToken().isEmpty()) {
+                    return ResponseEntity.ok().body(new SuccessResponse<>(authenticationResponse));
+                }
+                return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(400, "Invalid data credentials")));
             }
-            return ResponseEntity.badRequest().body(AuthenticationResponse.builder()
-                    .message("Invalid data")
-                    .build());
+            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(400, "Bad request")));
         } catch (Exception e) {
             logger.error("Error occurred during authentication", e);
-            return new ResponseEntity<AuthenticationResponse>(AuthenticationResponse.builder()
-                    .message("Something went wrong")
-                    .build(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse(new ErrorDescription(501, "Internal server error")));
         }
     }
 }
