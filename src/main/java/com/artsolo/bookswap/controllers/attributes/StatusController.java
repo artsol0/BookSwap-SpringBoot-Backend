@@ -1,5 +1,9 @@
 package com.artsolo.bookswap.controllers.attributes;
 
+import com.artsolo.bookswap.controllers.responses.ErrorDescription;
+import com.artsolo.bookswap.controllers.responses.ErrorResponse;
+import com.artsolo.bookswap.controllers.responses.MessageResponse;
+import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.models.Language;
 import com.artsolo.bookswap.models.Status;
 import com.artsolo.bookswap.services.StatusService;
@@ -19,26 +23,44 @@ public class StatusController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addNewStatus(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> addNewStatus(@RequestBody Map<String, String> request) {
         try {
-            if (statusService.addNewStatus(request.get("status"))) {
-                return ResponseEntity.ok("New status added");
+            if (request.get("status") != null) {
+                if (statusService.addNewStatus(request.get("status"))) {
+                    return ResponseEntity.ok().body(new MessageResponse("Status was added successfully"));
+                }
+                return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Failed to add status")
+                ));
             }
-            return ResponseEntity.badRequest().body("Requested data was not presented in the database");
+            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Bad request")
+            ));
         } catch (Exception e) {
-            return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Internal server error")
+            ));
         }
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteStatusById(@PathVariable Long id) {
+    public ResponseEntity<?> deleteStatusById(@PathVariable Long id) {
         try {
             if (statusService.deleteStatusById(id)) {
-                return ResponseEntity.ok("Status was deleted");
+                return ResponseEntity.ok().body(new MessageResponse("Status was deleted successfully"));
             }
-            return ResponseEntity.badRequest().body("Requested data was not presented in the database");
+            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Status still exits")
+            ));
         } catch (Exception e) {
-            return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Internal server error")
+            ));
         }
     }
 
@@ -47,20 +69,29 @@ public class StatusController {
         try {
             Status status = statusService.getStatusById(id);
             if (status != null) {
-                return ResponseEntity.ok().body(status);
+                return ResponseEntity.ok().body(new SuccessResponse<>(status));
             }
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(new ErrorDescription(
+                    HttpStatus.NOT_FOUND.value(),
+                    "Status with id '" + id + "' not found")
+            ));
         } catch (Exception e) {
-            return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Internal server error")
+            ));
         }
     }
 
     @GetMapping("/get/all")
     public ResponseEntity<?> getAllStatuses() {
         try {
-            return ResponseEntity.ok().body(statusService.getAllStatuses());
+            return ResponseEntity.ok().body(new SuccessResponse<>(statusService.getAllStatuses()));
         } catch (Exception e) {
-            return new ResponseEntity<String>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Internal server error")
+            ));
         }
     }
 }

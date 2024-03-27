@@ -29,8 +29,8 @@ public class LibraryService {
 
     public boolean addNewBookToUserLibrary(User user, Book book) {
         Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
-        libraryRepository.save(library);
-        return true;
+        library = libraryRepository.save(library);
+        return libraryRepository.existsById(library.getLibraryId());
     }
 
     public boolean addNewBookToUserLibrary(Map<String, String> request) {
@@ -38,8 +38,8 @@ public class LibraryService {
         Book book = bookRepository.findById(Long.parseLong(request.get("bookId"))).orElse(null);
         if (user != null && book != null) {
             Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
-            libraryRepository.save(library);
-            return true;
+            library = libraryRepository.save(library);
+            return libraryRepository.existsById(library.getLibraryId());
         }
         return false;
     }
@@ -51,7 +51,7 @@ public class LibraryService {
             Library library = libraryRepository.findById(new CompositeKey(user.getId(), book.getId())).orElse(null);
             if (library != null) {
                 libraryRepository.delete(library);
-                return true;
+                return libraryRepository.existsById(library.getLibraryId());
             }
         }
         return false;

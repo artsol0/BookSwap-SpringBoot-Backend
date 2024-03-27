@@ -2,6 +2,7 @@ package com.artsolo.bookswap.controllers.auth;
 
 import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
+import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.services.AuthenticationService;
 import com.artsolo.bookswap.services.JwtService;
@@ -26,16 +27,24 @@ public class AuthenticationController {
         try {
             if (request.getNickname() != null && request.getEmail() != null && request.getPassword() != null) {
                 if (authenticationService.register(request)) {
-                    return ResponseEntity.ok().body(new SuccessResponse<>("User registered successfully"));
+                    return ResponseEntity.ok().body(new MessageResponse("User registered successfully"));
                 }
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(
-                        new ErrorDescription(409, "Email address is already taken")));
+                        new ErrorDescription(
+                                HttpStatus.CONFLICT.value(),
+                                "Email address is already taken")
+                ));
             }
-            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(400, "Bad request")));
+            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Bad request")
+            ));
         } catch (Exception e) {
             logger.error("Error occurred during registration", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponse(new ErrorDescription(501, "Internal server error")));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "Internal server error")
+            ));
         }
     }
 
@@ -52,13 +61,21 @@ public class AuthenticationController {
                 if (authenticationResponse.getToken() != null && !authenticationResponse.getToken().isEmpty()) {
                     return ResponseEntity.ok().body(new SuccessResponse<>(authenticationResponse));
                 }
-                return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(400, "Invalid data credentials")));
+                return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Invalid data credentials")
+                ));
             }
-            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(400, "Bad request")));
+            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Bad request"))
+            );
         } catch (Exception e) {
             logger.error("Error occurred during authentication", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponse(new ErrorDescription(501, "Internal server error")));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
+                            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "Internal server error")
+            ));
         }
     }
 }

@@ -89,24 +89,28 @@ public class BookService {
 
     public BookResponse getBookById(Long id) {
         Optional<Book> book = bookRepository.findById(id);
-        BookResponse bookResponse = new BookResponse();
-        if (book.isPresent()) {
-            bookResponse = BookResponse.builder()
-                    .id(book.get().getId())
-                    .title(book.get().getTitle())
-                    .author(book.get().getAuthor())
-                    .genres(book.get().getGenres().stream().map(Genre::getGenre).collect(Collectors.toList()))
-                    .quality(book.get().getQuality().getQuality())
-                    .status(book.get().getStatus().getStatus())
-                    .language(book.get().getLanguage().getLanguage())
-                    .photo(book.get().getPhoto())
-                    .build();
-        }
-        return bookResponse;
+        return book.map(value -> BookResponse.builder()
+                .id(value.getId())
+                .title(value.getTitle())
+                .author(value.getAuthor())
+                .genres(value.getGenres().stream().map(Genre::getGenre).collect(Collectors.toList()))
+                .quality(value.getQuality().getQuality())
+                .status(value.getStatus().getStatus())
+                .language(value.getLanguage().getLanguage())
+                .photo(value.getPhoto())
+                .build())
+                .orElse(null);
     }
 
     public byte[] getBookPhoto(Long id) {
         Optional<Book> book = bookRepository.findById(id);
         return book.map(Book::getPhoto).orElse(null);
+    }
+
+    public boolean bookRequestIsValid(BookRequest request) {
+        return (request.getTitle() != null && request.getAuthor() != null
+                && request.getGenreIds() != null && request.getQualityId() != null
+                && request.getStatusId() != null && request.getLanguageId() != null
+                && request.getPhoto() != null);
     }
 }
