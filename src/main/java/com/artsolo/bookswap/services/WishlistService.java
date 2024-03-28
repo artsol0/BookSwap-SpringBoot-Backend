@@ -1,6 +1,6 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.book.BookResponse;
+import com.artsolo.bookswap.controllers.book.GetBookResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.BookRepository;
 import com.artsolo.bookswap.repositoryes.WishlistRepository;
@@ -46,12 +46,12 @@ public class WishlistService {
         return false;
     }
 
-    public List<BookResponse> getAllWishlistBooks(Principal currentUser) {
+    public List<GetBookResponse> getAllWishlistBooks(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         List<Wishlist> wishlists = wishlistRepository.findByUserId(user.getId());
-        List<BookResponse> bookResponses = new ArrayList<>();
+        List<GetBookResponse> getBookResponses = new ArrayList<>();
         for (Wishlist wishlist : wishlists) {
-            bookResponses.add(BookResponse.builder()
+            getBookResponses.add(GetBookResponse.builder()
                             .id(wishlist.getBook().getId())
                             .title(wishlist.getBook().getTitle())
                             .author(wishlist.getBook().getAuthor())
@@ -61,6 +61,6 @@ public class WishlistService {
                             .language(wishlist.getBook().getLanguage().getLanguage())
                             .build());
         }
-        return bookResponses;
+        return getBookResponses;
     }
 }

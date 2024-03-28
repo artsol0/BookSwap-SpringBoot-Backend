@@ -4,8 +4,6 @@ import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
-import com.artsolo.bookswap.models.Book;
-import com.artsolo.bookswap.models.Review;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.LibraryService;
 import com.artsolo.bookswap.services.ReviewService;
@@ -15,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/book")
@@ -29,7 +26,7 @@ public class BookController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addNewBook(@ModelAttribute BookRequest request, Principal currentUser) {
+    public ResponseEntity<?> addNewBook(@ModelAttribute AddBookRequest request, Principal currentUser) {
         try {
             if (bookService.bookRequestIsValid(request)) {
                 if (bookService.addNewBook(request, currentUser)) {
@@ -73,9 +70,9 @@ public class BookController {
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getBookById(@PathVariable Long id) {
         try {
-            BookResponse bookResponse = bookService.getBookById(id);
-            if (bookResponse != null) {
-                return ResponseEntity.ok().body(new SuccessResponse<>(bookResponse));
+            GetBookResponse getBookResponse = bookService.getBookById(id);
+            if (getBookResponse != null) {
+                return ResponseEntity.ok().body(new SuccessResponse<>(getBookResponse));
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(new ErrorDescription(
                     HttpStatus.NOT_FOUND.value(),

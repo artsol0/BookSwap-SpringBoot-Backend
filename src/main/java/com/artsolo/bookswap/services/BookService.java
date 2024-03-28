@@ -1,13 +1,11 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.book.BookRequest;
-import com.artsolo.bookswap.controllers.book.BookResponse;
+import com.artsolo.bookswap.controllers.book.AddBookRequest;
+import com.artsolo.bookswap.controllers.book.GetBookResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -26,12 +24,13 @@ public class BookService {
     private final LibraryRepository libraryRepository;
     private final WishlistRepository wishlistRepository;
     private final ReviewRepository reviewRepository;
+    private final UserService userService;
 
     public BookService(BookRepository bookRepository, GenreRepository genreRepository,
                        QualityRepository qualityRepository, StatusRepository statusRepository,
                        LanguageRepository languageRepository, LibraryService libraryService,
                        LibraryRepository libraryRepository, WishlistRepository wishlistRepository,
-                       ReviewRepository reviewRepository) {
+                       ReviewRepository reviewRepository, UserService userService) {
         this.bookRepository = bookRepository;
         this.genreRepository = genreRepository;
         this.qualityRepository = qualityRepository;
@@ -41,28 +40,29 @@ public class BookService {
         this.libraryRepository = libraryRepository;
         this.wishlistRepository = wishlistRepository;
         this.reviewRepository = reviewRepository;
+        this.userService = userService;
     }
 
-    public boolean addNewBook(BookRequest bookRequest, Principal currentUser) throws IOException {
+    public boolean addNewBook(AddBookRequest addBookRequest, Principal currentUser) throws IOException {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
 
-        List<Genre> genres = bookRequest.getGenreIds().stream().map(genreId -> genreRepository.findById(genreId)
+        List<Genre> genres = addBookRequest.getGenreIds().stream().map(genreId -> genreRepository.findById(genreId)
                         .orElseThrow(() -> new RuntimeException("Genre not found"))).toList();
 
-        Quality quality = qualityRepository.findById(bookRequest.getQualityId())
+        Quality quality = qualityRepository.findById(addBookRequest.getQualityId())
                 .orElseThrow(() -> new RuntimeException("Quality not found"));
 
-        Status status = statusRepository.findById(bookRequest.getStatusId())
+        Status status = statusRepository.findById(addBookRequest.getStatusId())
                 .orElseThrow(() -> new RuntimeException("Status not found"));
 
-        Language language = languageRepository.findById(bookRequest.getLanguageId())
+        Language language = languageRepository.findById(addBookRequest.getLanguageId())
                 .orElseThrow(() -> new RuntimeException("Language not found"));
 
-        byte[] photo = bookRequest.getPhoto().getBytes();
+        byte[] photo = addBookRequest.getPhoto().getBytes();
 
         Book book = Book.builder()
-                .title(bookRequest.getTitle())
-                .author(bookRequest.getAuthor())
+                .title(addBookRequest.getTitle())
+                .author(addBookRequest.getAuthor())
                 .genres(genres)
                 .quality(quality)
                 .status(status)
@@ -87,9 +87,9 @@ public class BookService {
         return !bookRepository.existsById(id);
     }
 
-    public BookResponse getBookById(Long id) {
+    public GetBookResponse getBookById(Long id) {
         Optional<Book> book = bookRepository.findById(id);
-        return book.map(value -> BookResponse.builder()
+        return book.map(value -> GetBookResponse.builder()
                 .id(value.getId())
                 .title(value.getTitle())
                 .author(value.getAuthor())
@@ -107,7 +107,7 @@ public class BookService {
         return book.map(Book::getPhoto).orElse(null);
     }
 
-    public boolean bookRequestIsValid(BookRequest request) {
+    public boolean bookRequestIsValid(AddBookRequest request) {
         return (request.getTitle() != null && request.getAuthor() != null
                 && request.getGenreIds() != null && request.getQualityId() != null
                 && request.getStatusId() != null && request.getLanguageId() != null

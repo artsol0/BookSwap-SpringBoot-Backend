@@ -30,7 +30,8 @@ public class User implements UserDetails {
     private String password;
     private Integer points;
     @Lob
-    private Byte[] photo;
+    @Column(columnDefinition="BLOB")
+    private byte[] photo;
     private Boolean activity;
     @Column(name = "registration_date")
     private LocalDate registrationDate;
@@ -38,7 +39,7 @@ public class User implements UserDetails {
     private String city;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Token> tokens;
 
     @Override

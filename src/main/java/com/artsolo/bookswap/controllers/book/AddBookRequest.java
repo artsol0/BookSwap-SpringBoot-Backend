@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -11,13 +12,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BookResponse {
-    private Long id;
+public class AddBookRequest {
     private String title;
     private String author;
-    private List<String> genres;
-    private String quality;
-    private String status;
-    private String language;
-    private byte[] photo;
+    private List<Long> genreIds;
+    private Long qualityId;
+    private Long statusId;
+    private Long languageId;
+    private MultipartFile photo;
 }

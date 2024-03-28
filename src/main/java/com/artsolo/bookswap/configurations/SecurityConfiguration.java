@@ -34,8 +34,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**", "/api/v1/forgot-password/**")
                         .permitAll()
-                        .requestMatchers("api/v1/user/**")
-                        .hasAuthority("ADMINISTRATOR")
+//                        .requestMatchers("api/v1/user/**")
+//                        .hasAuthority("ADMINISTRATOR")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

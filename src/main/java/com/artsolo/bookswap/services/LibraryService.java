@@ -1,6 +1,6 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.book.BookResponse;
+import com.artsolo.bookswap.controllers.book.GetBookResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.BookRepository;
 import com.artsolo.bookswap.repositoryes.LibraryRepository;
@@ -20,25 +20,35 @@ public class LibraryService {
     private final LibraryRepository libraryRepository;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
+    private final UserService userService;
 
-    public LibraryService(LibraryRepository libraryRepository, UserRepository userRepository, BookRepository bookRepository) {
+    public LibraryService(LibraryRepository libraryRepository, UserRepository userRepository, BookRepository bookRepository, UserService userService) {
         this.libraryRepository = libraryRepository;
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
+        this.userService = userService;
     }
 
+    /*
+    * Increasing the user's points if he added the book himself
+    * */
     public boolean addNewBookToUserLibrary(User user, Book book) {
         Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
         library = libraryRepository.save(library);
+        userService.increaseUserPoints(15, user);
         return libraryRepository.existsById(library.getLibraryId());
     }
 
+    /*
+     * Decreasing the user's points if the book was added by the system during the exchange
+     * */
     public boolean addNewBookToUserLibrary(Map<String, String> request) {
         User user = userRepository.findById(Long.parseLong(request.get("userId"))).orElse(null);
         Book book = bookRepository.findById(Long.parseLong(request.get("bookId"))).orElse(null);
         if (user != null && book != null) {
             Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
             library = libraryRepository.save(library);
+            userService.decreaseUserPoints(15, user);
             return libraryRepository.existsById(library.getLibraryId());
         }
         return false;
@@ -51,18 +61,19 @@ public class LibraryService {
             Library library = libraryRepository.findById(new CompositeKey(user.getId(), book.getId())).orElse(null);
             if (library != null) {
                 libraryRepository.delete(library);
-                return libraryRepository.existsById(library.getLibraryId());
+                userService.increaseUserPoints(20, user);
+                return !libraryRepository.existsById(library.getLibraryId());
             }
         }
         return false;
     }
 
-    public List<BookResponse> getAllLibraryBooks(Principal currentUser) {
+    public List<GetBookResponse> getAllLibraryBooks(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         List<Library> libraries = libraryRepository.findByUserId(user.getId());
-        List<BookResponse> bookResponses = new ArrayList<>();
+        List<GetBookResponse> getBookResponses = new ArrayList<>();
         for (Library library : libraries) {
-            bookResponses.add(BookResponse.builder()
+            getBookResponses.add(GetBookResponse.builder()
                     .id(library.getBook().getId())
                     .title(library.getBook().getTitle())
                     .author(library.getBook().getAuthor())
@@ -72,7 +83,7 @@ public class LibraryService {
                     .language(library.getBook().getLanguage().getLanguage())
                     .build());
         }
-        return bookResponses;
+        return getBookResponses;
     }
 
 }
