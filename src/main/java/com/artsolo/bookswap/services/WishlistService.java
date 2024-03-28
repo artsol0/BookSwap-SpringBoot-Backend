@@ -59,6 +59,7 @@ public class WishlistService {
                             .quality(wishlist.getBook().getQuality().getQuality())
                             .status(wishlist.getBook().getStatus().getStatus())
                             .language(wishlist.getBook().getLanguage().getLanguage())
+                            .photo(wishlist.getBook().getPhoto())
                             .build());
         }
         return getBookResponses;

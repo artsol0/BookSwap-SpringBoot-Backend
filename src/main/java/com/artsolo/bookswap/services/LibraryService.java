@@ -20,38 +20,34 @@ public class LibraryService {
     private final LibraryRepository libraryRepository;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
-    private final UserService userService;
 
     public LibraryService(LibraryRepository libraryRepository, UserRepository userRepository, BookRepository bookRepository, UserService userService) {
         this.libraryRepository = libraryRepository;
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
-        this.userService = userService;
     }
 
-    /*
-    * Increasing the user's points if he added the book himself
-    * */
     public boolean addNewBookToUserLibrary(User user, Book book) {
         Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
         library = libraryRepository.save(library);
-        userService.increaseUserPoints(15, user);
         return libraryRepository.existsById(library.getLibraryId());
     }
 
-    /*
-     * Decreasing the user's points if the book was added by the system during the exchange
-     * */
     public boolean addNewBookToUserLibrary(Map<String, String> request) {
         User user = userRepository.findById(Long.parseLong(request.get("userId"))).orElse(null);
         Book book = bookRepository.findById(Long.parseLong(request.get("bookId"))).orElse(null);
         if (user != null && book != null) {
             Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
             library = libraryRepository.save(library);
-            userService.decreaseUserPoints(15, user);
             return libraryRepository.existsById(library.getLibraryId());
         }
         return false;
+    }
+
+    public boolean removeBookFromUserLibrary(User user, Book book) {
+        Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
+        libraryRepository.deleteById(library.getLibraryId());
+        return !libraryRepository.existsById(library.getLibraryId());
     }
 
     public boolean removeBookFromUserLibrary(Map<String, String> request) {
@@ -61,7 +57,6 @@ public class LibraryService {
             Library library = libraryRepository.findById(new CompositeKey(user.getId(), book.getId())).orElse(null);
             if (library != null) {
                 libraryRepository.delete(library);
-                userService.increaseUserPoints(20, user);
                 return !libraryRepository.existsById(library.getLibraryId());
             }
         }
@@ -81,6 +76,7 @@ public class LibraryService {
                     .quality(library.getBook().getQuality().getQuality())
                     .status(library.getBook().getStatus().getStatus())
                     .language(library.getBook().getLanguage().getLanguage())
+                    .photo(library.getBook().getPhoto())
                     .build());
         }
         return getBookResponses;
