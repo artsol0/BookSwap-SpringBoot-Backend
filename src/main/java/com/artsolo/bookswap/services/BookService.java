@@ -4,6 +4,7 @@ import com.artsolo.bookswap.controllers.book.AddBookRequest;
 import com.artsolo.bookswap.controllers.book.GetBookResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BookService {
     private final BookRepository bookRepository;
     private final GenreRepository genreRepository;
@@ -24,24 +26,6 @@ public class BookService {
     private final LibraryRepository libraryRepository;
     private final WishlistRepository wishlistRepository;
     private final ReviewRepository reviewRepository;
-    private final UserService userService;
-
-    public BookService(BookRepository bookRepository, GenreRepository genreRepository,
-                       QualityRepository qualityRepository, StatusRepository statusRepository,
-                       LanguageRepository languageRepository, LibraryService libraryService,
-                       LibraryRepository libraryRepository, WishlistRepository wishlistRepository,
-                       ReviewRepository reviewRepository, UserService userService) {
-        this.bookRepository = bookRepository;
-        this.genreRepository = genreRepository;
-        this.qualityRepository = qualityRepository;
-        this.statusRepository = statusRepository;
-        this.languageRepository = languageRepository;
-        this.libraryService = libraryService;
-        this.libraryRepository = libraryRepository;
-        this.wishlistRepository = wishlistRepository;
-        this.reviewRepository = reviewRepository;
-        this.userService = userService;
-    }
 
     public boolean addNewBook(AddBookRequest addBookRequest, Principal currentUser) throws IOException {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,6 +22,7 @@ public class Note {
     @ManyToOne
     @JoinColumn(name = "book_id")
     private Book book;
-    String country;
-    String city;
+    private String country;
+    private String city;
+    private LocalDate date;
 }

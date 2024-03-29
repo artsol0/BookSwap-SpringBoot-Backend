@@ -1,10 +1,9 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.GetExchangeResponse;
+import com.artsolo.bookswap.controllers.exchange.GetExchangeResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.BookRepository;
 import com.artsolo.bookswap.repositoryes.ExchangeRepository;
-import com.artsolo.bookswap.repositoryes.LibraryRepository;
 import com.artsolo.bookswap.repositoryes.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

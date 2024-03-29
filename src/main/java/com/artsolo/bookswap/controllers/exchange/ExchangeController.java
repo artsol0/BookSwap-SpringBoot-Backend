@@ -1,4 +1,4 @@
-package com.artsolo.bookswap.controllers;
+package com.artsolo.bookswap.controllers.exchange;
 
 import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
@@ -31,7 +31,7 @@ public class ExchangeController {
                 }
                 return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
                         HttpStatus.BAD_REQUEST.value(),
-                        "Failed to add book")
+                        "Failed to create new exchange")
                 ));
             }
             return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
@@ -89,6 +89,30 @@ public class ExchangeController {
         }
     }
 
+    @GetMapping("/get/initiation")
+    public ResponseEntity<?> getAllInitiateExchanges(Principal currentUser) {
+        try {
+            return ResponseEntity.ok().body(new SuccessResponse<>(exchangeService.getAllUserInitiateExchanges(currentUser)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Internal server error")
+            ));
+        }
+    }
+
+    @GetMapping("/get/recipient")
+    public ResponseEntity<?> getAllRecipientExchanges(Principal currentUser) {
+        try {
+            return ResponseEntity.ok().body(new SuccessResponse<>(exchangeService.getAllUserRecipientExchanges(currentUser)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Internal server error")
+            ));
+        }
+    }
+
     @PutMapping("/confirm/{id}")
     public ResponseEntity<?> confirmExchangeById(@PathVariable Long id, Principal currentUser) {
         try {
@@ -106,5 +130,7 @@ public class ExchangeController {
             ));
         }
     }
+
+
 
 }

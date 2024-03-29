@@ -20,16 +20,19 @@ public class LibraryService {
     private final LibraryRepository libraryRepository;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
+    private final NoteService noteService;
 
-    public LibraryService(LibraryRepository libraryRepository, UserRepository userRepository, BookRepository bookRepository, UserService userService) {
+    public LibraryService(LibraryRepository libraryRepository, UserRepository userRepository, BookRepository bookRepository, UserService userService, NoteService noteService) {
         this.libraryRepository = libraryRepository;
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
+        this.noteService = noteService;
     }
 
     public boolean addNewBookToUserLibrary(User user, Book book) {
         Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
         library = libraryRepository.save(library);
+        noteService.note(user, book);
         return libraryRepository.existsById(library.getLibraryId());
     }
 
@@ -38,6 +41,7 @@ public class LibraryService {
         Book book = bookRepository.findById(Long.parseLong(request.get("bookId"))).orElse(null);
         if (user != null && book != null) {
             Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
+            noteService.note(user, book);
             library = libraryRepository.save(library);
             return libraryRepository.existsById(library.getLibraryId());
         }
