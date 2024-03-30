@@ -1,16 +1,26 @@
 package com.artsolo.bookswap.configurations;
 
+import com.artsolo.bookswap.controllers.responses.ErrorDescription;
+import com.artsolo.bookswap.controllers.responses.ErrorResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+
+import java.time.LocalDateTime;
 
 
 @Configuration
@@ -27,15 +37,24 @@ public class SecurityConfiguration {
         this.logoutHandler = logoutHandler;
     }
 
+    @Autowired
+    private AccessDeniedHandler customAccessDeniedHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**", "/api/v1/forgot-password/**")
-                        .permitAll()
-//                        .requestMatchers("api/v1/user/**")
-//                        .hasAuthority("ADMINISTRATOR")
+                                .requestMatchers("/api/v1/auth/**", "/api/v1/forgot-password/**").permitAll()
+                                .requestMatchers(HttpMethod.GET).permitAll()
+                                .requestMatchers("/api/v1/genre/add",
+                                        "/api/v1/language/add",
+                                        "/api/v1/quality/add",
+                                        "/api/v1/status/add").hasAnyAuthority("ADMINISTRATOR","MODERATOR")
+                                .requestMatchers("/api/v1/genre/delete/**",
+                                        "/api/v1/language/delete/**",
+                                        "/api/v1/quality/delete/**",
+                                        "/api/v1/status/delete/**").hasAuthority("ADMINISTRATOR")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -48,9 +67,28 @@ public class SecurityConfiguration {
                                 (request, response, authentication) ->
                                 SecurityContextHolder.clearContext()
                         )
+                )
+                .exceptionHandling(exception -> exception
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(authenticationEntryPoint())
                 );
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setContentType("application/json");
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            ObjectMapper objectMapper = new ObjectMapper();
+            ErrorDescription errorDescription = new ErrorDescription(
+                    HttpStatus.UNAUTHORIZED.value(),
+                    "Unauthorized access",
+                    null
+            );
+            objectMapper.writeValue(response.getWriter(), new ErrorResponse(errorDescription));
+        };
     }
 
 }

@@ -22,7 +22,7 @@ public class QualityController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addNewStatus(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> addNewQuality(@RequestBody Map<String, String> request) {
         try {
             if (request.get("quality") != null) {
                 if (qualityService.addNewQuality(request.get("quality"))) {
@@ -83,7 +83,7 @@ public class QualityController {
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<?> getAllStatuses() {
+    public ResponseEntity<?> getAllQualities() {
         try {
             return ResponseEntity.ok().body(new SuccessResponse<>(qualityService.getAllQualities()));
         } catch (Exception e) {
