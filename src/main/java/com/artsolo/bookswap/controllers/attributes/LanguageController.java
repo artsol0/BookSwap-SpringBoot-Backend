@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/language")
@@ -26,71 +27,70 @@ public class LanguageController {
         try {
             if (request.get("language") != null) {
                 if (languageService.addNewLanguage(request.get("language"))) {
-                    return ResponseEntity.ok().body(new MessageResponse("Language was added successfully"));
+                    return ResponseEntity.ok().body(MessageResponse.builder().message("Language was added successfully")
+                            .build());
                 }
-                return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
-                        HttpStatus.BAD_REQUEST.value(),
-                        "Failed to add language")
-                ));
+                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                        HttpStatus.BAD_REQUEST.value(), "Filed to add new language")).build());
             }
-            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Bad request")
-            ));
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteLanguageById(@PathVariable Long id) {
         try {
-            if (languageService.deleteLanguageById(id)) {
-                return ResponseEntity.ok().body(new MessageResponse("Language was deleted successfully"));
+            Optional<Language> language = languageService.getLanguageById(id);
+            if (language.isPresent()) {
+                if (languageService.deleteLanguage(language.get())) {
+                    return ResponseEntity.ok().body(MessageResponse.builder().message("Language was deleted successfully")
+                            .build());
+                }
+                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                        HttpStatus.BAD_REQUEST.value(), "Language still exist")).build());
             }
-            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Language still exits")
-            ));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.NOT_FOUND.value(), "Language with id '" + id + "' not found")).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getLanguageById(@PathVariable Long id) {
         try {
-            Language language = languageService.getLanguageById(id);
-            if (language != null) {
-                return ResponseEntity.ok().body(new SuccessResponse<>(language));
+            Optional<Language> language = languageService.getLanguageById(id);
+            if (language.isPresent()) {
+                return ResponseEntity.ok().body(SuccessResponse.builder().data(language).build());
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.NOT_FOUND.value(),
-                    "Language with id '" + id + "' not found")
-            ));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.NOT_FOUND.value(), "Language with id '" + id + "' not found")).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 
     @GetMapping("/get/all")
     public ResponseEntity<?> getAllLanguages() {
         try {
-            return ResponseEntity.ok().body(new SuccessResponse<>(languageService.getAllLanguages()));
+            return ResponseEntity.ok().body(SuccessResponse.builder().data(languageService.getAllLanguages()).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 

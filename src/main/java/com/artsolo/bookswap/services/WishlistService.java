@@ -16,42 +16,32 @@ import java.util.stream.Collectors;
 public class WishlistService {
 
     private final WishlistRepository wishlistRepository;
-    private final BookRepository bookRepository;
 
     public WishlistService(WishlistRepository wishlistRepository, BookRepository bookRepository) {
         this.wishlistRepository = wishlistRepository;
-        this.bookRepository = bookRepository;
     }
 
-    public boolean addBookToWishlist(Long id, Principal currentUser) {
+    public boolean addBookToWishlist(Book book, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        Book book = bookRepository.findById(id).orElse(null);
-        if (book != null) {
-            CompositeKey compositeKey = new CompositeKey(user.getId(), book.getId());
-            Wishlist wishlist = new Wishlist(compositeKey, user, book);
-            wishlistRepository.save(wishlist);
-            return wishlistRepository.existsById(compositeKey);
-        }
-        return false;
+        CompositeKey compositeKey = new CompositeKey(user.getId(), book.getId());
+        Wishlist wishlist = new Wishlist(compositeKey, user, book);
+        wishlistRepository.save(wishlist);
+        return wishlistRepository.existsById(compositeKey);
     }
 
-    public boolean removeBookFromWishlist(Long id, Principal currentUser) {
+    public boolean removeBookFromWishlist(Book book, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        Book book = bookRepository.findById(id).orElse(null);
-        if (book != null) {
-            CompositeKey compositeKey = new CompositeKey(user.getId(), book.getId());
-            wishlistRepository.deleteById(compositeKey);
-            return !wishlistRepository.existsById(compositeKey);
-        }
-        return false;
+        CompositeKey compositeKey = new CompositeKey(user.getId(), book.getId());
+        wishlistRepository.deleteById(compositeKey);
+        return !wishlistRepository.existsById(compositeKey);
     }
 
     public List<BookResponse> getAllWishlistBooks(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         List<Wishlist> wishlists = wishlistRepository.findByUserId(user.getId());
-        List<BookResponse> bookRespons = new ArrayList<>();
+        List<BookResponse> getBookResponses = new ArrayList<>();
         for (Wishlist wishlist : wishlists) {
-            bookRespons.add(BookResponse.builder()
+            getBookResponses.add(BookResponse.builder()
                             .id(wishlist.getBook().getId())
                             .title(wishlist.getBook().getTitle())
                             .author(wishlist.getBook().getAuthor())
@@ -62,6 +52,6 @@ public class WishlistService {
                             .photo(wishlist.getBook().getPhoto())
                             .build());
         }
-        return bookRespons;
+        return getBookResponses;
     }
 }

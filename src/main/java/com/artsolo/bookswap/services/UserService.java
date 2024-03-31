@@ -1,10 +1,9 @@
 package com.artsolo.bookswap.services;
 
+import com.artsolo.bookswap.controllers.user.UserResponse;
 import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.repositoryes.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -25,22 +25,28 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
     }
 
-    public String changeUserActivity(User user) {
-        if (user != null) {
-            if (user.getActivity()) {
-                user.setActivity(Boolean.FALSE);
-                userRepository.save(user);
-                return "User " + user.getNickname() + " with id " + user.getId() + " was banned";
-            }
-            user.setActivity(Boolean.TRUE);
-            userRepository.save(user);
-            return "User " + user.getNickname() + " with id " + user.getId() + " was unbanned";
-        }
-        throw new NullPointerException("User cannot be null");
+    public UserResponse getUserResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .points(user.getPoints())
+                .country(user.getCountry())
+                .city(user.getCity())
+                .registrationDate(user.getRegistrationDate())
+                .activity(user.getActivity())
+                .role(user.getRole())
+                .photo(user.getPhoto())
+                .build();
+    }
+
+    public boolean changeUserActivity(User user) {
+        user.setActivity(!user.getActivity());
+        return user.getActivity();
     }
 
     public void changeUserPhoto(MultipartFile photo, Principal currentUser) {

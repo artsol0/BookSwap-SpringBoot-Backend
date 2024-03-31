@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GetExchangeResponse {
+public class ExchangeResponse {
     private Long id;
     private String initiator;
     private String recipient;

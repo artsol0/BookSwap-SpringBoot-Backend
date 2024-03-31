@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/quality")
@@ -26,71 +27,70 @@ public class QualityController {
         try {
             if (request.get("quality") != null) {
                 if (qualityService.addNewQuality(request.get("quality"))) {
-                    return ResponseEntity.ok().body(new MessageResponse("Quality was added successfully"));
+                    return ResponseEntity.ok().body(MessageResponse.builder().message("Quality was added successfully")
+                            .build());
                 }
-                return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
-                        HttpStatus.BAD_REQUEST.value(),
-                        "Failed to add genre")
-                ));
+                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                        HttpStatus.BAD_REQUEST.value(), "Filed to add new quality")).build());
             }
-            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Bad request")
-            ));
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteQualityById(@PathVariable Long id) {
         try {
-            if (qualityService.deleteQualityById(id)) {
-                return ResponseEntity.ok().body(new MessageResponse("Quality was deleted successfully"));
+            Optional<Quality> quality = qualityService.getQualityById(id);
+            if (quality.isPresent()) {
+                if (qualityService.deleteQuality(quality.get())) {
+                    return ResponseEntity.ok().body(MessageResponse.builder().message("Quality was deleted successfully")
+                            .build());
+                }
+                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                        HttpStatus.BAD_REQUEST.value(), "Quality still exist")).build());
             }
-            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Quality still exits")
-            ));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.NOT_FOUND.value(), "Quality with id '" + id + "' not found")).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getQualityById(@PathVariable Long id) {
         try {
-            Quality quality = qualityService.getQualityById(id);
-            if (quality != null) {
-                return ResponseEntity.ok().body(new SuccessResponse<>(quality));
+            Optional<Quality> quality = qualityService.getQualityById(id);
+            if (quality.isPresent()) {
+                return ResponseEntity.ok().body(SuccessResponse.builder().data(quality).build());
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.NOT_FOUND.value(),
-                    "Quality with id '" + id + "' not found")
-            ));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.NOT_FOUND.value(), "Quality with id '" + id + "' not found")).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 
     @GetMapping("/get/all")
     public ResponseEntity<?> getAllQualities() {
         try {
-            return ResponseEntity.ok().body(new SuccessResponse<>(qualityService.getAllQualities()));
+            return ResponseEntity.ok().body(SuccessResponse.builder().data(qualityService.getAllQualities()).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 }

@@ -4,7 +4,6 @@ import com.artsolo.bookswap.models.Language;
 import com.artsolo.bookswap.repositoryes.LanguageRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,16 +22,12 @@ public class LanguageService {
         return languageRepository.existsById(newLanguage.getId());
     }
 
-    public boolean deleteLanguageById(Long id) {
-        Optional<Language> language = languageRepository.findById(id);
-        if (language.isPresent()) {
-            languageRepository.deleteById(language.get().getId());
-            return !languageRepository.existsById(language.get().getId());
-        }
-        return false;
+    public boolean deleteLanguage(Language language) {
+        languageRepository.deleteById(language.getId());
+        return !languageRepository.existsById(language.getId());
     }
 
-    public Language getLanguageById(Long id) {return languageRepository.findById(id).orElse(null);}
+    public Optional<Language> getLanguageById(Long id) {return languageRepository.findById(id);}
 
     public List<Language> getAllLanguages() {return languageRepository.findAll();}
 }

@@ -29,8 +29,8 @@ public class NoteService {
         noteRepository.save(newNote);
     }
 
-    public List<GetNoteResponse> getNotesByBookId(Long id) {
-        List<Note> notes = noteRepository.findAllByBookId(id);
+    public List<GetNoteResponse> getNotesByBook(Book book) {
+        List<Note> notes = noteRepository.findAllByBookId(book.getId());
         List<GetNoteResponse> responses = new ArrayList<>();
         for (Note note : notes) {
             responses.add(GetNoteResponse.builder()

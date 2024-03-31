@@ -22,17 +22,13 @@ public class StatusService {
         return statusRepository.existsById(newStatus.getId());
     }
 
-    public boolean deleteStatusById(Long id) {
-        Optional<Status> status = statusRepository.findById(id);
-        if (status.isPresent()) {
-            statusRepository.deleteById(status.get().getId());
-            return !statusRepository.existsById(status.get().getId());
-        }
-        return false;
+    public boolean deleteStatus(Status status) {
+        statusRepository.deleteById(status.getId());
+        return !statusRepository.existsById(status.getId());
     }
 
-    public Status getStatusById(Long id) {
-        return statusRepository.findById(id).orElse(null);
+    public Optional<Status> getStatusById(Long id) {
+        return statusRepository.findById(id);
     }
 
     public List<Status> getAllStatuses() {return statusRepository.findAll();}

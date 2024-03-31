@@ -22,17 +22,13 @@ public class QualityService {
         return qualityRepository.existsById(newQuality.getId());
     }
 
-    public boolean deleteQualityById(Long id) {
-        Optional<Quality> quality = qualityRepository.findById(id);
-        if (quality.isPresent()) {
-            qualityRepository.deleteById(quality.get().getId());
-            return !qualityRepository.existsById(quality.get().getId());
-        }
-        return false;
+    public boolean deleteQuality(Quality quality) {
+        qualityRepository.deleteById(quality.getId());
+        return !qualityRepository.existsById(quality.getId());
     }
 
-    public Quality getQualityById(Long id) {
-        return qualityRepository.findById(id).orElse(null);
+    public Optional<Quality> getQualityById(Long id) {
+        return qualityRepository.findById(id);
     }
 
     public List<Quality> getAllQualities() {return qualityRepository.findAll();}
