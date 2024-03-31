@@ -20,8 +20,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
-import java.time.LocalDateTime;
-
 
 @Configuration
 @EnableWebSecurity

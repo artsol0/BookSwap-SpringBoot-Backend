@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,71 +27,70 @@ public class GenreController {
         try {
             if (request.get("genre") != null) {
                 if (genreService.addNewGenre(request.get("genre"))) {
-                    return ResponseEntity.ok().body(new MessageResponse("Genre was added successfully"));
+                    return ResponseEntity.ok().body(MessageResponse.builder().message("Genre was added successfully")
+                            .build());
                 }
-                return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
-                        HttpStatus.BAD_REQUEST.value(),
-                        "Failed to add genre")
-                ));
+                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                        HttpStatus.BAD_REQUEST.value(), "Filed to add new genre")).build());
             }
-            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Bad request")
-            ));
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteGenreById(@PathVariable Long id) {
         try {
-            if (genreService.deleteGenreById(id)) {
-                return ResponseEntity.ok().body(new MessageResponse("Genre was deleted successfully"));
+            Optional<Genre> genre = genreService.getGenreById(id);
+            if (genre.isPresent()) {
+                if (genreService.deleteGenre(genre.get())) {
+                    return ResponseEntity.ok().body(MessageResponse.builder().message("Genre was deleted successfully")
+                            .build());
+                }
+                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                        HttpStatus.BAD_REQUEST.value(), "Genre still exist")).build());
             }
-            return ResponseEntity.badRequest().body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(),
-                    "Genre still exits")
-            ));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.NOT_FOUND.value(), "Genre with id '" + id + "' not found")).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getGenreById(@PathVariable Long id) {
         try {
-            Genre genre = genreService.getGenreById(id);
-            if (genre != null) {
-                return ResponseEntity.ok().body(new SuccessResponse<>(genre));
+            Optional<Genre> genre = genreService.getGenreById(id);
+            if (genre.isPresent()) {
+                return ResponseEntity.ok().body(SuccessResponse.builder().data(genre).build());
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(new ErrorDescription(
-                            HttpStatus.NOT_FOUND.value(),
-                    "Genre with id '" + id + "' not found")
-            ));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.NOT_FOUND.value(), "Genre with id '" + id + "' not found")).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 
     @GetMapping("/get/all")
     public ResponseEntity<?> getAllGenres() {
         try {
-            return ResponseEntity.ok().body(new SuccessResponse<>(genreService.getAllGenres()));
+            return ResponseEntity.ok().body(SuccessResponse.builder().data(genreService.getAllGenres()).build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(new ErrorDescription(
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "Internal server error")
-            ));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.book.GetBookResponse;
+import com.artsolo.bookswap.controllers.book.BookResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.BookRepository;
 import com.artsolo.bookswap.repositoryes.LibraryRepository;
@@ -67,12 +67,12 @@ public class LibraryService {
         return false;
     }
 
-    public List<GetBookResponse> getAllLibraryBooks(Principal currentUser) {
+    public List<BookResponse> getAllLibraryBooks(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         List<Library> libraries = libraryRepository.findByUserId(user.getId());
-        List<GetBookResponse> getBookResponses = new ArrayList<>();
+        List<BookResponse> bookRespons = new ArrayList<>();
         for (Library library : libraries) {
-            getBookResponses.add(GetBookResponse.builder()
+            bookRespons.add(BookResponse.builder()
                     .id(library.getBook().getId())
                     .title(library.getBook().getTitle())
                     .author(library.getBook().getAuthor())
@@ -83,7 +83,7 @@ public class LibraryService {
                     .photo(library.getBook().getPhoto())
                     .build());
         }
-        return getBookResponses;
+        return bookRespons;
     }
 
 }

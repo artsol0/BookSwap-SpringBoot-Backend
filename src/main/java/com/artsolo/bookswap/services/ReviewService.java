@@ -24,23 +24,19 @@ public class ReviewService {
         this.bookRepository = bookRepository;
     }
 
-    public boolean addBookRevive(Long bookId, ReviewRequest reviewRequest, Principal currentUser) {
+    public boolean addBookRevive(Book book, ReviewRequest reviewRequest, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        Optional<Book> book = bookRepository.findById(bookId);
-        if (book.isPresent()) {
-            CompositeKey compositeKey = new CompositeKey(user.getId(), book.get().getId());
-            Review review = Review.builder()
-                    .reviewId(compositeKey)
-                    .user(user)
-                    .book(book.get())
-                    .rating(reviewRequest.getRating())
-                    .review(reviewRequest.getReview())
-                    .build();
+        CompositeKey compositeKey = new CompositeKey(user.getId(), book.getId());
+        Review review = Review.builder()
+                .reviewId(compositeKey)
+                .user(user)
+                .book(book)
+                .rating(reviewRequest.getRating())
+                .review(reviewRequest.getReview())
+                .build();
 
-            review = reviewRepository.save(review);
-            return reviewRepository.existsById(review.getReviewId());
-        }
-        return false;
+        review = reviewRepository.save(review);
+        return reviewRepository.existsById(review.getReviewId());
     }
 
     public boolean deleteReviveById(Long bookId, Long userId) {
@@ -52,18 +48,15 @@ public class ReviewService {
         return false;
     }
 
-    public List<ReviewResponse> getAllBookReviews(Long bookId) {
-        Optional<Book> book = bookRepository.findById(bookId);
+    public List<ReviewResponse> getAllBookReviews(Book book) {
         List<ReviewResponse> responses = new ArrayList<>();
-        if (book.isPresent()) {
-            List<Review> reviews = book.get().getReviews();
-            for (Review review : reviews) {
-                responses.add(ReviewResponse.builder()
-                                .nickname(review.getUser().getNickname())
-                                .rating(review.getRating())
-                                .review(review.getReview())
-                                .build());
-            }
+        List<Review> reviews = book.getReviews();
+        for (Review review : reviews) {
+            responses.add(ReviewResponse.builder()
+                    .nickname(review.getUser().getNickname())
+                    .rating(review.getRating())
+                    .review(review.getReview())
+                    .build());
         }
         return responses;
     }

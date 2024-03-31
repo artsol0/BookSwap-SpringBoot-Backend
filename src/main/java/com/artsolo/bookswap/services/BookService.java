@@ -1,7 +1,7 @@
 package com.artsolo.bookswap.services;
 
 import com.artsolo.bookswap.controllers.book.AddBookRequest;
-import com.artsolo.bookswap.controllers.book.GetBookResponse;
+import com.artsolo.bookswap.controllers.book.BookResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +26,21 @@ public class BookService {
     private final LibraryRepository libraryRepository;
     private final WishlistRepository wishlistRepository;
     private final ReviewRepository reviewRepository;
+
+    public Optional<Book> getBookById(Long id) {return bookRepository.findById(id);}
+
+    public BookResponse getBookResponse(Book book) {
+        return BookResponse.builder()
+                        .id(book.getId())
+                        .title(book.getTitle())
+                        .author(book.getAuthor())
+                        .genres(book.getGenres().stream().map(Genre::getGenre).collect(Collectors.toList()))
+                        .quality(book.getQuality().getQuality())
+                        .status(book.getStatus().getStatus())
+                        .language(book.getLanguage().getLanguage())
+                        .photo(book.getPhoto())
+                        .build();
+    }
 
     public boolean addNewBook(AddBookRequest addBookRequest, Principal currentUser) throws IOException {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
@@ -58,8 +73,7 @@ public class BookService {
         return libraryService.addNewBookToUserLibrary(user, newBook);
     }
 
-    public boolean deleteBookById(Long id) {
-        Book book = bookRepository.findById(id).orElseThrow(() -> new RuntimeException("Book bot found"));
+    public boolean deleteBook(Book book) {
         CompositeKey compositeKey = new CompositeKey(book.getLibrary().getUser().getId(), book.getId());
 
         libraryRepository.deleteById(compositeKey);
@@ -68,28 +82,10 @@ public class BookService {
 
         libraryRepository.deleteById(new CompositeKey(book.getId(), book.getLibrary().getUser().getId()));
         bookRepository.deleteById(book.getId());
-        return !bookRepository.existsById(id);
+        return !bookRepository.existsById(book.getId());
     }
 
-    public GetBookResponse getBookById(Long id) {
-        Optional<Book> book = bookRepository.findById(id);
-        return book.map(value -> GetBookResponse.builder()
-                .id(value.getId())
-                .title(value.getTitle())
-                .author(value.getAuthor())
-                .genres(value.getGenres().stream().map(Genre::getGenre).collect(Collectors.toList()))
-                .quality(value.getQuality().getQuality())
-                .status(value.getStatus().getStatus())
-                .language(value.getLanguage().getLanguage())
-                .photo(value.getPhoto())
-                .build())
-                .orElse(null);
-    }
-
-    public byte[] getBookPhoto(Long id) {
-        Optional<Book> book = bookRepository.findById(id);
-        return book.map(Book::getPhoto).orElse(null);
-    }
+    public byte[] getBookPhoto(Book book) {return book.getPhoto();}
 
     public boolean bookRequestIsValid(AddBookRequest request) {
         return (request.getTitle() != null && request.getAuthor() != null

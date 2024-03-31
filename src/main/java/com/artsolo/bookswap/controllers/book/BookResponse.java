@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GetBookResponse {
+public class BookResponse {
     private Long id;
     private String title;
     private String author;
