@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,6 +41,42 @@ public class BookService {
                         .language(book.getLanguage().getLanguage())
                         .photo(book.getPhoto())
                         .build();
+    }
+
+    public List<BookResponse> getBooksByGenreId(Long id) {
+        List<Book> books = bookRepository.findAllByGenreId(id);
+        List<BookResponse> bookResponses = new ArrayList<>();
+        for (Book book : books) {
+            bookResponses.add(getBookResponse(book));
+        }
+        return bookResponses;
+    }
+
+    public List<BookResponse> getBooksByLanguageId(Long id) {
+        List<Book> books = bookRepository.findAllByLanguageId(id);
+        List<BookResponse> bookResponses = new ArrayList<>();
+        for (Book book : books) {
+            bookResponses.add(getBookResponse(book));
+        }
+        return bookResponses;
+    }
+
+    public List<BookResponse> getBooksByTitleOrAuthor(String keyword) {
+        List<Book> books = bookRepository.findAllByTitleOrAuthorContaining(keyword);
+        List<BookResponse> bookResponses = new ArrayList<>();
+        for (Book book : books) {
+            bookResponses.add(getBookResponse(book));
+        }
+        return bookResponses;
+    }
+
+    public List<BookResponse> getBooksByGenreIdAndLanguageId(Long genreId, Long languageId) {
+        List<Book> books = bookRepository.findAllByGenreIdAndLanguageId(genreId, languageId);
+        List<BookResponse> bookResponses = new ArrayList<>();
+        for (Book book : books) {
+            bookResponses.add(getBookResponse(book));
+        }
+        return bookResponses;
     }
 
     public boolean addNewBook(AddBookRequest addBookRequest, Principal currentUser) throws IOException {

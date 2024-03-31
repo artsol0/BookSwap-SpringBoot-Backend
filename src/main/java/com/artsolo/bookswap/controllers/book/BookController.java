@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -80,6 +81,62 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(
                     new ErrorDescription(HttpStatus.NOT_FOUND.value(), "Book with id '" + id + "' not found")).build()
             );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
+        }
+    }
+
+    @GetMapping("/get/by/genre/{id}")
+    public ResponseEntity<?> getBooksByGenreId(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok().body(SuccessResponse.builder().data(bookService.getBooksByGenreId(id)).build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
+        }
+    }
+
+    @GetMapping("/get/by/language/{id}")
+    public ResponseEntity<?> getBooksByLanguageId(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok().body(SuccessResponse.builder().data(bookService.getBooksByLanguageId(id)).build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
+        }
+    }
+
+    @GetMapping("/get/by/keyword")
+    public ResponseEntity<?> getBooksByTitleOrAuthor(@RequestParam("word") String keyword) {
+        try {
+            return ResponseEntity.ok().body(SuccessResponse.builder().data(bookService.getBooksByTitleOrAuthor(keyword)).build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
+                    .build()
+            );
+        }
+    }
+
+    @GetMapping("/get/by/genre/and/language")
+    public ResponseEntity<?> getBooksByGenreAndLanguage(@RequestBody Map<String, String> request) {
+        try {
+            if (request.get("genreId") != null && request.get("languageId") != null) {
+                return ResponseEntity.ok().body(SuccessResponse.builder()
+                                .data(bookService.getBooksByGenreIdAndLanguageId(
+                                Long.parseLong(request.get("genreId")),
+                                Long.parseLong(request.get("languageId"))
+                                )).build());
+            }
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
                     .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
