@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.sql.Blob;
 import java.util.List;
@@ -47,11 +49,13 @@ public class Book {
     @Column(columnDefinition="BLOB")
     private byte[] photo;
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book", orphanRemoval = true)
     private List<Review> reviews;
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Wishlist> wishlist;
-    @OneToOne(mappedBy = "book")
-    private Library library;
+    @OneToMany(mappedBy = "book", orphanRemoval = true)
+    private List<Wishlist> wishlist;
+    @OneToMany(mappedBy = "book", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<Exchange> exchanges;
+    @OneToMany(mappedBy = "book", orphanRemoval = true)
+    private List<Note> notes;
 
 }

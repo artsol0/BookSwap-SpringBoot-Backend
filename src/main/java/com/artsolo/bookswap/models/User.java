@@ -39,8 +39,18 @@ public class User implements UserDetails {
     private String city;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Token> tokens;
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    private List<Library> library;
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    private List<Wishlist> wishlist;
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    private List<Review> reviews;
+    @OneToMany(mappedBy = "initiator", orphanRemoval = true)
+    private List<Exchange> initiations;
+    @OneToMany(mappedBy = "recipient", orphanRemoval = true)
+    private List<Exchange> recipients;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

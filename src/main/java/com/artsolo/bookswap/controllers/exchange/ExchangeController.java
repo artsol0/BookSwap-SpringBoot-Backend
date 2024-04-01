@@ -4,12 +4,12 @@ import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
-import com.artsolo.bookswap.models.Book;
-import com.artsolo.bookswap.models.Exchange;
-import com.artsolo.bookswap.models.User;
+import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.ExchangeService;
+import com.artsolo.bookswap.services.LibraryService;
 import com.artsolo.bookswap.services.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,16 +20,19 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
+@Slf4j
 @RequestMapping("/api/v1/exchange")
 public class ExchangeController {
     private final ExchangeService exchangeService;
     private final UserService userService;
     private final BookService bookService;
+    private final LibraryService libraryService;
 
-    public ExchangeController(ExchangeService exchangeService, UserService userService, BookService bookService) {
+    public ExchangeController(ExchangeService exchangeService, UserService userService, BookService bookService, LibraryService libraryService) {
         this.exchangeService = exchangeService;
         this.userService = userService;
         this.bookService = bookService;
+        this.libraryService = libraryService;
     }
 
     @PostMapping("/create")
@@ -149,12 +152,18 @@ public class ExchangeController {
             if (exchange.isPresent()) {
                 User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
                 if (exchangeService.userIsRecipientOfExchange(exchange.get(), user)) {
-                    if (exchangeService.confirmExchange(exchange.get(), user)) {
-                        return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was confirmed successfully")
-                                .build());
+                    Optional<Library> library = libraryService.getLibraryById(
+                            new CompositeKey(exchange.get().getRecipient().getId(), exchange.get().getBook().getId()));
+                    if (library.isPresent()) {
+                        if (exchangeService.confirmExchange(exchange.get(), library.get())) {
+                            return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was confirmed successfully")
+                                    .build());
+                        }
+                        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                                HttpStatus.BAD_REQUEST.value(), "Failed to confirm exchange")).build());
                     }
                     return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                            HttpStatus.BAD_REQUEST.value(), "Failed to confirm exchange")).build());
+                            HttpStatus.BAD_REQUEST.value(), "Book not found in user library")).build());
                 }
                 return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
                         HttpStatus.BAD_REQUEST.value(), "You are not recipient of exchange")).build());
@@ -162,6 +171,7 @@ public class ExchangeController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
                     HttpStatus.NOT_FOUND.value(), "Exchange with id '" + id + "' not found")).build());
         } catch (Exception e) {
+            log.error("An error occurred:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
                     .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
                     .build()

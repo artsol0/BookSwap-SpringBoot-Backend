@@ -23,10 +23,8 @@ public class BookService {
     private final QualityRepository qualityRepository;
     private final StatusRepository statusRepository;
     private final LanguageRepository languageRepository;
-    private final LibraryService libraryService;
     private final LibraryRepository libraryRepository;
-    private final WishlistRepository wishlistRepository;
-    private final ReviewRepository reviewRepository;
+    private final LibraryService libraryService;
 
     public Optional<Book> getBookById(Long id) {return bookRepository.findById(id);}
 
@@ -111,13 +109,8 @@ public class BookService {
     }
 
     public boolean deleteBook(Book book) {
-        CompositeKey compositeKey = new CompositeKey(book.getLibrary().getUser().getId(), book.getId());
-
-        libraryRepository.deleteById(compositeKey);
-        wishlistRepository.deleteById(compositeKey);
-        reviewRepository.deleteById(compositeKey);
-
-        libraryRepository.deleteById(new CompositeKey(book.getId(), book.getLibrary().getUser().getId()));
+        List<Library> libraries = libraryRepository.findAllByBookId(book.getId());
+        libraryRepository.deleteAll(libraries);
         bookRepository.deleteById(book.getId());
         return !bookRepository.existsById(book.getId());
     }

@@ -9,5 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface LibraryRepository extends JpaRepository<Library, CompositeKey> {
-    List<Library> findByUserId(Long userId);
+    List<Library> findAllByUserId(Long userId);
+    List<Library> findAllByBookId(Long bookId);
 }

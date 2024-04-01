@@ -3,6 +3,7 @@ package com.artsolo.bookswap.services;
 import com.artsolo.bookswap.controllers.exchange.ExchangeResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.ExchangeRepository;
+import com.artsolo.bookswap.repositoryes.LibraryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ExchangeService {
     private final ExchangeRepository exchangeRepository;
+    private final LibraryRepository libraryRepository;
     private final LibraryService libraryService;
     private final UserService userService;
 
@@ -81,13 +83,13 @@ public class ExchangeService {
     }
 
     @Transactional
-    public boolean confirmExchange(Exchange exchange, User recipient) {
-        User initiator = exchange.getInitiator();
-        if (libraryService.removeBookFromUserLibrary(recipient, exchange.getBook())) {
-            if (libraryService.addNewBookToUserLibrary(initiator, exchange.getBook())) {
-                userService.increaseUserPoints(15, recipient);
-                userService.decreaseUserPoints(20, initiator);
+    public boolean confirmExchange(Exchange exchange, Library library) {
+        if (libraryService.removeBookFromUserLibrary(library)) {
+            if (libraryService.addNewBookToUserLibrary(exchange.getInitiator(), exchange.getBook())) {
+                userService.increaseUserPoints(15, exchange.getRecipient());
+                userService.decreaseUserPoints(20, exchange.getInitiator());
                 exchange.setConfirmed(Boolean.TRUE);
+                exchangeRepository.save(exchange);
                 return exchange.getConfirmed();
             }
         }

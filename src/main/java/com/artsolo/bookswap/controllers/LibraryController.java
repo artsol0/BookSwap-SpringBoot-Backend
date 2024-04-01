@@ -5,6 +5,8 @@ import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.models.Book;
+import com.artsolo.bookswap.models.CompositeKey;
+import com.artsolo.bookswap.models.Library;
 import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.LibraryService;
@@ -71,12 +73,18 @@ public class LibraryController {
                 if (user.isPresent()) {
                     Optional<Book> book = bookService.getBookById(Long.parseLong(request.get("bookId")));
                     if (book.isPresent()) {
-                        if (libraryService.removeBookFromUserLibrary(user.get(), book.get())) {
-                            return ResponseEntity.ok().body(MessageResponse.builder().message("Book removed from library successfully")
-                                    .build());
+                        Optional<Library> library =
+                                libraryService.getLibraryById(new CompositeKey(user.get().getId(), book.get().getId()));
+                        if (library.isPresent()) {
+                            if (libraryService.removeBookFromUserLibrary(library.get())) {
+                                return ResponseEntity.ok().body(MessageResponse.builder().message("Book removed from library successfully")
+                                        .build());
+                            }
+                            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                                    HttpStatus.BAD_REQUEST.value(), "Book still in the library")).build());
                         }
                         return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                                HttpStatus.BAD_REQUEST.value(), "Book still in the library")).build());
+                                HttpStatus.BAD_REQUEST.value(), "Library not found")).build());
                     }
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
                             HttpStatus.NOT_FOUND.value(), "Book with id '" + request.get("bookId") + "' not found"))

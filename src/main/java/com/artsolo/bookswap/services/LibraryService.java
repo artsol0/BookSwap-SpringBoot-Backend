@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +23,8 @@ public class LibraryService {
         this.noteService = noteService;
     }
 
+    public Optional<Library> getLibraryById(CompositeKey compositeKey) {return libraryRepository.findById(compositeKey);}
+
     public boolean addNewBookToUserLibrary(User user, Book book) {
         Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
         library = libraryRepository.save(library);
@@ -29,15 +32,14 @@ public class LibraryService {
         return libraryRepository.existsById(library.getLibraryId());
     }
 
-    public boolean removeBookFromUserLibrary(User user, Book book) {
-        Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
+    public boolean removeBookFromUserLibrary(Library library) {
         libraryRepository.deleteById(library.getLibraryId());
         return !libraryRepository.existsById(library.getLibraryId());
     }
 
     public List<BookResponse> getAllLibraryBooks(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        List<Library> libraries = libraryRepository.findByUserId(user.getId());
+        List<Library> libraries = libraryRepository.findAllByUserId(user.getId());
         List<BookResponse> getBookResponses = new ArrayList<>();
         for (Library library : libraries) {
             getBookResponses.add(BookResponse.builder()
