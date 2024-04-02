@@ -1,9 +1,9 @@
 package com.artsolo.bookswap.services;
 
 import com.artsolo.bookswap.controllers.exchange.ExchangeResponse;
+import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.ExchangeRepository;
-import com.artsolo.bookswap.repositoryes.LibraryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,13 +12,11 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ExchangeService {
     private final ExchangeRepository exchangeRepository;
-    private final LibraryRepository libraryRepository;
     private final LibraryService libraryService;
     private final UserService userService;
 
@@ -33,7 +31,9 @@ public class ExchangeService {
         return exchangeRepository.existsById(exchange.getId());
     }
 
-    public Optional<Exchange> getExchangeById(Long id) {return exchangeRepository.findById(id);}
+    public Exchange getExchangeById(Long id) {
+        return exchangeRepository.findById(id).orElseThrow(() -> new NoDataFoundException("Exchange", id));
+    }
 
     public ExchangeResponse getExchangeResponse(Exchange exchange) {
         return ExchangeResponse.builder()

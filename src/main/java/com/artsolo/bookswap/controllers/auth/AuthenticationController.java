@@ -24,24 +24,15 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        try {
-            if (request.getNickname() != null && request.getEmail() != null && request.getPassword() != null) {
-                if (authenticationService.register(request)) {
-                    return ResponseEntity.ok().body(MessageResponse.builder().message("User registered successfully")
-                            .build());
-                }
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder().error(new ErrorDescription(
-                        HttpStatus.CONFLICT.value(), "Email address is already taken")).build());
+        if (request.getNickname() != null && request.getEmail() != null && request.getPassword() != null) {
+            if (authenticationService.register(request)) {
+                return ResponseEntity.ok().body(MessageResponse.builder().message("User registered successfully").build());
             }
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
-        } catch (Exception e) {
-            logger.error("Error occurred during registration", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
-                    .build()
-            );
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.CONFLICT.value(), "Email address is already taken")).build());
         }
+        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
     }
 
     @GetMapping("/confirm")
@@ -51,23 +42,15 @@ public class AuthenticationController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
-        try {
-            if (request.getEmail() != null && request.getPassword() != null) {
-                AuthenticationResponse authenticationResponse = authenticationService.authenticate(request);
-                if (authenticationResponse.getToken() != null && !authenticationResponse.getToken().isEmpty()) {
-                    return ResponseEntity.ok().body(SuccessResponse.builder().data(authenticationResponse).build());
-                }
-                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                        HttpStatus.BAD_REQUEST.value(), "Invalid data credentials")).build());
+        if (request.getEmail() != null && request.getPassword() != null) {
+            AuthenticationResponse authenticationResponse = authenticationService.authenticate(request);
+            if (authenticationResponse.getToken() != null && !authenticationResponse.getToken().isEmpty()) {
+                return ResponseEntity.ok().body(SuccessResponse.builder().data(authenticationResponse).build());
             }
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
-        } catch (Exception e) {
-            logger.error("Error occurred during authentication", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
-                    .build()
-            );
+                    HttpStatus.BAD_REQUEST.value(), "Invalid data credentials")).build());
         }
+        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
     }
 }

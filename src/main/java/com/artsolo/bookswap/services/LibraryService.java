@@ -1,6 +1,7 @@
 package com.artsolo.bookswap.services;
 
 import com.artsolo.bookswap.controllers.book.BookResponse;
+import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.LibraryRepository;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,7 +23,10 @@ public class LibraryService {
         this.noteService = noteService;
     }
 
-    public Optional<Library> getLibraryById(CompositeKey compositeKey) {return libraryRepository.findById(compositeKey);}
+    public Library getLibraryById(CompositeKey compositeKey) {
+        return libraryRepository.findById(compositeKey).orElseThrow(() ->
+                new NoDataFoundException("Language", compositeKey.getUser_id(), compositeKey.getBook_id()));
+    }
 
     public boolean addNewBookToUserLibrary(User user, Book book) {
         Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);

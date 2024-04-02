@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @Slf4j
@@ -37,146 +36,74 @@ public class ExchangeController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createNewExchange(@RequestBody Map<String,String> request, Principal currentUser) {
-        try {
-            if (request.get("recipientId") != null && request.get("bookId") != null) {
-                Optional<User> recipient = userService.getUserById(Long.parseLong(request.get("recipientId")));
-                if (recipient.isPresent()) {
-                    Optional<Book> book = bookService.getBookById(Long.parseLong(request.get("bookId")));
-                    if (book.isPresent()) {
-                        User initiator = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-                        if (initiator.getPoints() >= 20) {
-                            if (exchangeService.createNewExchange(recipient.get(), initiator, book.get())) {
-                                return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was created successfully")
-                                        .build());
-                            }
-                            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                                    HttpStatus.BAD_REQUEST.value(), "Failed to create new exchange")).build());
-                        }
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
-                                HttpStatus.NOT_FOUND.value(), "You don't have enough points"))
-                                .build());
-                    }
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
-                            HttpStatus.NOT_FOUND.value(), "Book with id '" + request.get("bookId") + "' not found"))
-                            .build());
+        if (request.get("recipientId") != null && request.get("bookId") != null) {
+            User recipient = userService.getUserById(Long.parseLong(request.get("recipientId")));
+            Book book = bookService.getBookById(Long.parseLong(request.get("bookId")));
+            User initiator = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+            if (initiator.getPoints() >= 20) {
+                if (exchangeService.createNewExchange(recipient, initiator, book)) {
+                    return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was created successfully").build());
                 }
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
-                        HttpStatus.NOT_FOUND.value(), "User with id '" + request.get("userId") + "' not found"))
-                        .build());
+                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                        HttpStatus.BAD_REQUEST.value(), "Failed to create new exchange")).build());
             }
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
-                    .build()
-            );
-        }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.NOT_FOUND.value(), "You don't have enough points")).build());
+            }
+        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteExchangeById(@PathVariable Long id, Principal currentUser) {
-        try {
-            Optional<Exchange> exchange = exchangeService.getExchangeById(id);
-            if (exchange.isPresent()) {
-                User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-                if (exchangeService.userIsParticipantOfExchange(exchange.get(), user)){
-                    if (exchangeService.deleteExchange(exchange.get())) {
-                        return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was deleted successfully")
-                                .build());
-                    }
-                    return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                            HttpStatus.BAD_REQUEST.value(), "Exchange still exist")).build());
-                }
-                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                        HttpStatus.BAD_REQUEST.value(), "You are not participant of exchange")).build());
+        Exchange exchange = exchangeService.getExchangeById(id);
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        if (exchangeService.userIsParticipantOfExchange(exchange, user)){
+            if (exchangeService.deleteExchange(exchange)) {
+                return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was deleted successfully")
+                        .build());
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.NOT_FOUND.value(), "Exchange with id '" + id + "' not found")).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
-                    .build()
-            );
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(), "Exchange still exist")).build());
         }
+        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.BAD_REQUEST.value(), "You are not participant of exchange")).build());
     }
 
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getExchangeById(@PathVariable Long id) {
-        try {
-            Optional<Exchange> exchange = exchangeService.getExchangeById(id);
-            if (exchange.isPresent()) {
-                ExchangeResponse exchangeResponse = exchangeService.getExchangeResponse(exchange.get());
-                return ResponseEntity.ok().body(SuccessResponse.builder().data(exchangeResponse).build());
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.NOT_FOUND.value(), "Exchange with id '" + id + "' not found")).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
-                    .build()
-            );
-        }
+        ExchangeResponse exchangeResponse = exchangeService.getExchangeResponse(exchangeService.getExchangeById(id));
+        return ResponseEntity.ok().body(SuccessResponse.builder().data(exchangeResponse).build());
     }
 
     @GetMapping("/get/initiation")
     public ResponseEntity<?> getAllInitiateExchanges(Principal currentUser) {
-        try {
-            return ResponseEntity.ok().body(SuccessResponse.builder()
-                    .data(exchangeService.getAllUserInitiateExchanges(currentUser)).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
-                    .build()
-            );
-        }
+        return ResponseEntity.ok().body(SuccessResponse.builder()
+                .data(exchangeService.getAllUserInitiateExchanges(currentUser)).build());
     }
 
     @GetMapping("/get/recipient")
     public ResponseEntity<?> getAllRecipientExchanges(Principal currentUser) {
-        try {
-            return ResponseEntity.ok().body(SuccessResponse.builder()
-                    .data(exchangeService.getAllUserRecipientExchanges(currentUser)).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
-                    .build()
-            );
-        }
+        return ResponseEntity.ok().body(SuccessResponse.builder()
+                .data(exchangeService.getAllUserRecipientExchanges(currentUser)).build());
     }
 
     @PutMapping("/confirm/{id}")
     public ResponseEntity<?> confirmExchangeById(@PathVariable Long id, Principal currentUser) {
-        try {
-            Optional<Exchange> exchange = exchangeService.getExchangeById(id);
-            if (exchange.isPresent()) {
-                User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-                if (exchangeService.userIsRecipientOfExchange(exchange.get(), user)) {
-                    Optional<Library> library = libraryService.getLibraryById(
-                            new CompositeKey(exchange.get().getRecipient().getId(), exchange.get().getBook().getId()));
-                    if (library.isPresent()) {
-                        if (exchangeService.confirmExchange(exchange.get(), library.get())) {
-                            return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was confirmed successfully")
-                                    .build());
-                        }
-                        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                                HttpStatus.BAD_REQUEST.value(), "Failed to confirm exchange")).build());
-                    }
-                    return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                            HttpStatus.BAD_REQUEST.value(), "Book not found in user library")).build());
-                }
-                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                        HttpStatus.BAD_REQUEST.value(), "You are not recipient of exchange")).build());
+        Exchange exchange = exchangeService.getExchangeById(id);
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        if (exchangeService.userIsRecipientOfExchange(exchange, user)) {
+            Library library = libraryService.getLibraryById(
+                    new CompositeKey(exchange.getRecipient().getId(), exchange.getBook().getId()));
+            if (exchangeService.confirmExchange(exchange, library)) {
+                return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was confirmed successfully")
+                        .build());
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.NOT_FOUND.value(), "Exchange with id '" + id + "' not found")).build());
-        } catch (Exception e) {
-            log.error("An error occurred:", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
-                    .build()
-            );
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(), "Failed to confirm exchange")).build());
         }
+        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.BAD_REQUEST.value(), "You are not recipient of exchange")).build());
     }
 
 

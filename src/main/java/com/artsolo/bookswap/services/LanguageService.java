@@ -1,11 +1,11 @@
 package com.artsolo.bookswap.services;
 
+import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.Language;
 import com.artsolo.bookswap.repositoryes.LanguageRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LanguageService {
@@ -27,7 +27,9 @@ public class LanguageService {
         return !languageRepository.existsById(language.getId());
     }
 
-    public Optional<Language> getLanguageById(Long id) {return languageRepository.findById(id);}
+    public Language getLanguageById(Long id) {
+        return languageRepository.findById(id).orElseThrow(() -> new NoDataFoundException("Language", id));
+    }
 
     public List<Language> getAllLanguages() {return languageRepository.findAll();}
 }

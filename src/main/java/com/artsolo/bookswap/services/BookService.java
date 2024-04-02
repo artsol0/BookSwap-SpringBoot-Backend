@@ -2,6 +2,7 @@ package com.artsolo.bookswap.services;
 
 import com.artsolo.bookswap.controllers.book.AddBookRequest;
 import com.artsolo.bookswap.controllers.book.BookResponse;
+import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
 import lombok.RequiredArgsConstructor;
@@ -12,21 +13,22 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class BookService {
     private final BookRepository bookRepository;
-    private final GenreRepository genreRepository;
-    private final QualityRepository qualityRepository;
-    private final StatusRepository statusRepository;
-    private final LanguageRepository languageRepository;
+    private final GenreService genreService;
+    private final QualityService qualityService;
+    private final StatusService statusService;
+    private final LanguageService languageService;
     private final LibraryRepository libraryRepository;
     private final LibraryService libraryService;
 
-    public Optional<Book> getBookById(Long id) {return bookRepository.findById(id);}
+    public Book getBookById(Long id) {
+        return bookRepository.findById(id).orElseThrow(() -> new NoDataFoundException("Book", id));
+    }
 
     public BookResponse getBookResponse(Book book) {
         return BookResponse.builder()
@@ -79,19 +81,10 @@ public class BookService {
 
     public boolean addNewBook(AddBookRequest addBookRequest, Principal currentUser) throws IOException {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-
-        List<Genre> genres = addBookRequest.getGenreIds().stream().map(genreId -> genreRepository.findById(genreId)
-                        .orElseThrow(() -> new RuntimeException("Genre not found"))).toList();
-
-        Quality quality = qualityRepository.findById(addBookRequest.getQualityId())
-                .orElseThrow(() -> new RuntimeException("Quality not found"));
-
-        Status status = statusRepository.findById(addBookRequest.getStatusId())
-                .orElseThrow(() -> new RuntimeException("Status not found"));
-
-        Language language = languageRepository.findById(addBookRequest.getLanguageId())
-                .orElseThrow(() -> new RuntimeException("Language not found"));
-
+        List<Genre> genres = addBookRequest.getGenreIds().stream().map(genreService::getGenreById).collect(Collectors.toList());
+        Quality quality = qualityService.getQualityById(addBookRequest.getQualityId());
+        Status status = statusService.getStatusById(addBookRequest.getStatusId());
+        Language language = languageService.getLanguageById(addBookRequest.getLanguageId());
         byte[] photo = addBookRequest.getPhoto().getBytes();
 
         Book book = Book.builder()

@@ -17,11 +17,9 @@ import java.util.*;
 @Service
 public class ReviewService {
     private final ReviewRepository reviewRepository;
-    private final BookRepository bookRepository;
 
     public ReviewService(ReviewRepository reviewRepository, BookRepository bookRepository) {
         this.reviewRepository = reviewRepository;
-        this.bookRepository = bookRepository;
     }
 
     public boolean addBookRevive(Book book, ReviewRequest reviewRequest, Principal currentUser) {

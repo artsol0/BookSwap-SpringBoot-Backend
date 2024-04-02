@@ -1,6 +1,7 @@
 package com.artsolo.bookswap.services;
 
 import com.artsolo.bookswap.controllers.user.UserResponse;
+import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.repositoryes.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -25,8 +25,8 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new NoDataFoundException("User", id));
     }
 
     public UserResponse getUserResponse(User user) {

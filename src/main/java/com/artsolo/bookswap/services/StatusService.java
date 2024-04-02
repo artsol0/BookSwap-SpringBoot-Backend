@@ -1,11 +1,11 @@
 package com.artsolo.bookswap.services;
 
+import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.Status;
 import com.artsolo.bookswap.repositoryes.StatusRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class StatusService {
@@ -27,8 +27,8 @@ public class StatusService {
         return !statusRepository.existsById(status.getId());
     }
 
-    public Optional<Status> getStatusById(Long id) {
-        return statusRepository.findById(id);
+    public Status getStatusById(Long id) {
+        return statusRepository.findById(id).orElseThrow(() -> new NoDataFoundException("Status", id));
     }
 
     public List<Status> getAllStatuses() {return statusRepository.findAll();}

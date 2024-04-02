@@ -1,11 +1,11 @@
 package com.artsolo.bookswap.services;
 
+import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.Quality;
 import com.artsolo.bookswap.repositoryes.QualityRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class QualityService {
@@ -27,8 +27,8 @@ public class QualityService {
         return !qualityRepository.existsById(quality.getId());
     }
 
-    public Optional<Quality> getQualityById(Long id) {
-        return qualityRepository.findById(id);
+    public Quality getQualityById(Long id) {
+        return qualityRepository.findById(id).orElseThrow(() -> new NoDataFoundException("Quality", id));
     }
 
     public List<Quality> getAllQualities() {return qualityRepository.findAll();}

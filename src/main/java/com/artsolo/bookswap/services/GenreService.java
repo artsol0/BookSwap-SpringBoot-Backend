@@ -1,11 +1,11 @@
 package com.artsolo.bookswap.services;
 
+import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.Genre;
 import com.artsolo.bookswap.repositoryes.GenreRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class GenreService {
@@ -26,8 +26,8 @@ public class GenreService {
         return !genreRepository.existsById(genre.getId());
     }
 
-    public Optional<Genre> getGenreById(Long id) {
-        return genreRepository.findById(id);
+    public Genre getGenreById(Long id) {
+        return genreRepository.findById(id).orElseThrow(() -> new NoDataFoundException("Genre", id));
     }
 
     public List<Genre> getAllGenres() {return genreRepository.findAll();}

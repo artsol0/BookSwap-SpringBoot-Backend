@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/library")
@@ -34,86 +33,40 @@ public class LibraryController {
 
     @PostMapping("/add-book")
     public ResponseEntity<?> addBookToLibrary(@RequestBody Map<String, String> request) {
-        try {
-            if (request.get("userId") != null && request.get("bookId") != null) {
-                Optional<User> user = userService.getUserById(Long.parseLong(request.get("userId")));
-                if (user.isPresent()) {
-                    Optional<Book> book = bookService.getBookById(Long.parseLong(request.get("bookId")));
-                    if (book.isPresent()) {
-                        if (libraryService.addNewBookToUserLibrary(user.get(), book.get())) {
-                            return ResponseEntity.ok().body(MessageResponse.builder().message("Book was added to library successfully")
-                                    .build());
-                        }
-                        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                                HttpStatus.BAD_REQUEST.value(), "Failed to add book")).build());
-                    }
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
-                            HttpStatus.NOT_FOUND.value(), "Book with id '" + request.get("bookId") + "' not found"))
-                            .build());
-                }
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
-                        HttpStatus.NOT_FOUND.value(), "User with id '" + request.get("userId") + "' not found"))
+        if (request.get("userId") != null && request.get("bookId") != null) {
+            User user = userService.getUserById(Long.parseLong(request.get("userId")));
+            Book book = bookService.getBookById(Long.parseLong(request.get("bookId")));
+            if (libraryService.addNewBookToUserLibrary(user, book)) {
+                return ResponseEntity.ok().body(MessageResponse.builder().message("Book was added to library successfully")
                         .build());
             }
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
-                    .build()
-            );
-        }
+                    HttpStatus.BAD_REQUEST.value(), "Failed to add book")).build());
+            }
+        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
     }
 
     @DeleteMapping("/remove-book")
     public ResponseEntity<?> removeBookFromLibrary(@RequestBody Map<String, String> request) {
-        try {
-            if (request.get("userId") != null && request.get("bookId") != null) {
-                Optional<User> user = userService.getUserById(Long.parseLong(request.get("userId")));
-                if (user.isPresent()) {
-                    Optional<Book> book = bookService.getBookById(Long.parseLong(request.get("bookId")));
-                    if (book.isPresent()) {
-                        Optional<Library> library =
-                                libraryService.getLibraryById(new CompositeKey(user.get().getId(), book.get().getId()));
-                        if (library.isPresent()) {
-                            if (libraryService.removeBookFromUserLibrary(library.get())) {
-                                return ResponseEntity.ok().body(MessageResponse.builder().message("Book removed from library successfully")
-                                        .build());
-                            }
-                            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                                    HttpStatus.BAD_REQUEST.value(), "Book still in the library")).build());
-                        }
-                        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                                HttpStatus.BAD_REQUEST.value(), "Library not found")).build());
-                    }
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
-                            HttpStatus.NOT_FOUND.value(), "Book with id '" + request.get("bookId") + "' not found"))
-                            .build());
-                }
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
-                        HttpStatus.NOT_FOUND.value(), "User with id '" + request.get("userId") + "' not found"))
+        if (request.get("userId") != null && request.get("bookId") != null) {
+            User user = userService.getUserById(Long.parseLong(request.get("userId")));
+            Book book = bookService.getBookById(Long.parseLong(request.get("bookId")));
+            Library library = libraryService.getLibraryById(new CompositeKey(user.getId(), book.getId()));
+            if (libraryService.removeBookFromUserLibrary(library)) {
+                return ResponseEntity.ok().body(MessageResponse.builder().message("Book removed from library successfully")
                         .build());
             }
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(), "Book still in the library")).build());
+            }
+        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
                     HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
-                    .build()
-            );
-        }
     }
 
     @GetMapping("/get-books")
     public ResponseEntity<?> getAllLibraryBooks(Principal currentUser) {
-        try {
-            return ResponseEntity.ok().body(SuccessResponse.builder()
-                    .data(libraryService.getAllLibraryBooks(currentUser)).build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-                    .error(new ErrorDescription(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal server error"))
-                    .build()
-            );
-        }
+        return ResponseEntity.ok().body(SuccessResponse.builder()
+                .data(libraryService.getAllLibraryBooks(currentUser)).build());
     }
 }
