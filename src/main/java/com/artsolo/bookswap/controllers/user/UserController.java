@@ -4,6 +4,7 @@ import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
+import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.services.JwtService;
 import com.artsolo.bookswap.services.UserService;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,26 @@ public class UserController {
     public ResponseEntity<?> changePhoto(@RequestPart("photo") MultipartFile photo, Principal currentUser) {
         userService.changeUserPhoto(photo, currentUser);
         return ResponseEntity.ok().body(MessageResponse.builder().message("Photo changed successfully").build());
+    }
+
+    @PutMapping("/change-activity/{id}")
+    public ResponseEntity<?> changeActivityById(@PathVariable Long id) {
+        if (userService.changeUserActivity(userService.getUserById(id))) {
+            return ResponseEntity.ok().body(MessageResponse.builder().message("User is active").build());
+        }
+        return ResponseEntity.ok().body(MessageResponse.builder().message("User is inactive").build());
+    }
+
+    @PutMapping("set-role/{id}")
+    public ResponseEntity<?> setUserRole(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        if (request.get("role") != null) {
+            if (userService.setUserRole(userService.getUserById(id), Role.valueOf(request.get("role")))) {
+                return ResponseEntity.ok().body(MessageResponse.builder().message("User role changed").build());
+            }
+            return ResponseEntity.ok().body(MessageResponse.builder().message("User role not changed").build());
+        }
+        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
     }
 
     @PostMapping("/change-password")

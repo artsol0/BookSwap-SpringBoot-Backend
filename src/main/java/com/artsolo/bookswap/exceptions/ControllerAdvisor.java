@@ -29,6 +29,12 @@ public class ControllerAdvisor {
                 HttpStatus.PAYLOAD_TOO_LARGE.value(), "Request size is too large")).build());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.BAD_REQUEST.value(), "Provided illegal argument")).build());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception ex) {
         ex.printStackTrace();

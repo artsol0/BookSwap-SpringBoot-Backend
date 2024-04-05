@@ -1,5 +1,6 @@
 package com.artsolo.bookswap.controllers.auth;
 
+import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.services.AuthenticationService;
 import com.artsolo.bookswap.services.JwtService;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +23,8 @@ public class PasswordForgotController {
     }
 
     @PostMapping
-    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
-        return ResponseEntity.ok(authenticationService.forgotPassword(request));
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        return ResponseEntity.ok().body(MessageResponse.builder().message(authenticationService.forgotPassword(request)).build());
     }
 
     @GetMapping("/reset-password")

@@ -1,8 +1,10 @@
 package com.artsolo.bookswap.services;
 
+import com.artsolo.bookswap.controllers.user.UserController;
 import com.artsolo.bookswap.controllers.user.UserResponse;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.User;
+import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.repositoryes.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -46,7 +49,14 @@ public class UserService {
 
     public boolean changeUserActivity(User user) {
         user.setActivity(!user.getActivity());
+        user = userRepository.save(user);
         return user.getActivity();
+    }
+
+    public boolean setUserRole(User user, Role role) {
+        user.setRole(role);
+        user = userRepository.save(user);
+        return user.getRole().equals(role);
     }
 
     public void changeUserPhoto(MultipartFile photo, Principal currentUser) {
@@ -73,7 +83,7 @@ public class UserService {
     }
 
     public void decreaseUserPoints(int number, User user) {
-        user.setPoints(Math.max(user.getPoints() - number, 0));
+        user.setPoints(user.getPoints() - number);
         userRepository.save(user);
     }
 

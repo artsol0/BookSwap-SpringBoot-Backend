@@ -89,11 +89,15 @@ public class ExchangeService {
                 userService.increaseUserPoints(15, exchange.getRecipient());
                 userService.decreaseUserPoints(20, exchange.getInitiator());
                 exchange.setConfirmed(Boolean.TRUE);
-                exchangeRepository.save(exchange);
+                exchange = exchangeRepository.save(exchange);
                 return exchange.getConfirmed();
             }
         }
         return false;
+    }
+
+    public boolean exchangeIsConfirmed(Exchange exchange) {
+        return exchange.getConfirmed();
     }
 
     public boolean userIsRecipientOfExchange(Exchange exchange, User providedRecipient) {

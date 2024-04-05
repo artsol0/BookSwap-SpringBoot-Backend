@@ -2,6 +2,7 @@ package com.artsolo.bookswap.services;
 
 import com.artsolo.bookswap.controllers.book.ReviewRequest;
 import com.artsolo.bookswap.controllers.book.ReviewResponse;
+import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.Book;
 import com.artsolo.bookswap.models.CompositeKey;
 import com.artsolo.bookswap.models.Review;
@@ -22,6 +23,22 @@ public class ReviewService {
         this.reviewRepository = reviewRepository;
     }
 
+    public Review getReviewById(Long userId, Long bookId) {
+        CompositeKey compositeKey = new CompositeKey(userId, bookId);
+        return reviewRepository.findById(compositeKey)
+                .orElseThrow(() -> new NoDataFoundException("Review", userId, bookId));
+    }
+
+    public ReviewResponse getReviewResponse(Review review) {
+        return ReviewResponse.builder()
+                .userId(review.getReviewId().getUser_id())
+                .bookId(review.getReviewId().getBook_id())
+                .nickname(review.getUser().getNickname())
+                .rating(review.getRating())
+                .review(review.getReview())
+                .build();
+    }
+
     public boolean addBookRevive(Book book, ReviewRequest reviewRequest, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         CompositeKey compositeKey = new CompositeKey(user.getId(), book.getId());
@@ -37,13 +54,15 @@ public class ReviewService {
         return reviewRepository.existsById(review.getReviewId());
     }
 
-    public boolean deleteReviveById(Long bookId, Long userId) {
-        Optional<Review> revive = reviewRepository.findById(new CompositeKey(userId, bookId));
-        if (revive.isPresent()) {
-            reviewRepository.deleteById(revive.get().getReviewId());
-            return reviewRepository.existsById(revive.get().getReviewId());
-        }
-        return false;
+    public void updateReview(Review review, Integer rating, String reviewText) {
+        review.setRating(rating);
+        review.setReview(reviewText);
+        reviewRepository.save(review);
+    }
+
+    public boolean deleteRevive(Review review) {
+        reviewRepository.deleteById(review.getReviewId());
+        return !reviewRepository.existsById(review.getReviewId());
     }
 
     public List<ReviewResponse> getAllBookReviews(Book book) {
@@ -51,6 +70,8 @@ public class ReviewService {
         List<Review> reviews = book.getReviews();
         for (Review review : reviews) {
             responses.add(ReviewResponse.builder()
+                    .userId(review.getReviewId().getUser_id())
+                    .bookId(review.getReviewId().getBook_id())
                     .nickname(review.getUser().getNickname())
                     .rating(review.getRating())
                     .review(review.getReview())

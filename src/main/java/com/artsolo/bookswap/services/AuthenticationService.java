@@ -47,6 +47,8 @@ public class AuthenticationService {
                     .activity(Boolean.FALSE)
                     .registrationDate(LocalDate.now())
                     .points(0)
+                    .country("Unknown")
+                    .city("Unknown")
                     .build();
             var savedUser = userRepository.save(user);
             String jvtToken = jwtService.generateToken(user);

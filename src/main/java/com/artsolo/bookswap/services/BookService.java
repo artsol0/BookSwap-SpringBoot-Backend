@@ -2,6 +2,7 @@ package com.artsolo.bookswap.services;
 
 import com.artsolo.bookswap.controllers.book.AddBookRequest;
 import com.artsolo.bookswap.controllers.book.BookResponse;
+import com.artsolo.bookswap.controllers.book.UpdateBookRequest;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
@@ -79,8 +80,7 @@ public class BookService {
         return bookResponses;
     }
 
-    public boolean addNewBook(AddBookRequest addBookRequest, Principal currentUser) throws IOException {
-        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+    public boolean addNewBook(AddBookRequest addBookRequest, User user) throws IOException, NoDataFoundException {
         List<Genre> genres = addBookRequest.getGenreIds().stream().map(genreService::getGenreById).collect(Collectors.toList());
         Quality quality = qualityService.getQualityById(addBookRequest.getQualityId());
         Status status = statusService.getStatusById(addBookRequest.getStatusId());
@@ -108,6 +108,17 @@ public class BookService {
         return !bookRepository.existsById(book.getId());
     }
 
+    public void updateBook(Book book, UpdateBookRequest request) throws IOException, NoDataFoundException {
+        book.setTitle(request.getTitle());
+        book.setAuthor(request.getAuthor());
+        book.setGenres(request.getGenreIds().stream().map(genreService::getGenreById).collect(Collectors.toList()));
+        book.setQuality(qualityService.getQualityById(request.getQualityId()));
+        book.setStatus(statusService.getStatusById(request.getStatusId()));
+        book.setLanguage(languageService.getLanguageById(request.getLanguageId()));
+        book.setPhoto(request.getPhoto().getBytes());
+        bookRepository.save(book);
+    }
+
     public byte[] getBookPhoto(Book book) {return book.getPhoto();}
 
     public boolean bookRequestIsValid(AddBookRequest request) {
@@ -115,5 +126,9 @@ public class BookService {
                 && request.getGenreIds() != null && request.getQualityId() != null
                 && request.getStatusId() != null && request.getLanguageId() != null
                 && request.getPhoto() != null);
+    }
+
+    public boolean userIsBookOwner(User user, Book book) {
+        return user.getLibrary().stream().map(Library::getBook).anyMatch(libraryBook -> libraryBook.getId().equals(book.getId()));
     }
 }

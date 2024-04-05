@@ -92,18 +92,22 @@ public class ExchangeController {
     public ResponseEntity<?> confirmExchangeById(@PathVariable Long id, Principal currentUser) {
         Exchange exchange = exchangeService.getExchangeById(id);
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        if (exchangeService.userIsRecipientOfExchange(exchange, user)) {
-            Library library = libraryService.getLibraryById(
-                    new CompositeKey(exchange.getRecipient().getId(), exchange.getBook().getId()));
-            if (exchangeService.confirmExchange(exchange, library)) {
-                return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was confirmed successfully")
-                        .build());
+        if (!exchangeService.exchangeIsConfirmed(exchange)) {
+            if (exchangeService.userIsRecipientOfExchange(exchange, user)) {
+                Library library = libraryService.getLibraryById(
+                        new CompositeKey(exchange.getRecipient().getId(), exchange.getBook().getId()));
+                if (exchangeService.confirmExchange(exchange, library)) {
+                    return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was confirmed successfully")
+                            .build());
+                }
+                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                        HttpStatus.BAD_REQUEST.value(), "Failed to confirm exchange")).build());
             }
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Failed to confirm exchange")).build());
+                    HttpStatus.BAD_REQUEST.value(), "You are not recipient of exchange")).build());
         }
         return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "You are not recipient of exchange")).build());
+                HttpStatus.BAD_REQUEST.value(), "Exchange is already confirmed")).build());
     }
 
 

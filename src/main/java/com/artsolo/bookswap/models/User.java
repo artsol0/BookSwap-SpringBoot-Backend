@@ -41,7 +41,7 @@ public class User implements UserDetails {
     private Role role;
     @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Token> tokens;
-    @OneToMany(mappedBy = "user", orphanRemoval = true)
+    @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Library> library;
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     private List<Wishlist> wishlist;

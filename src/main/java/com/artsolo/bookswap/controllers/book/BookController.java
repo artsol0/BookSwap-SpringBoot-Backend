@@ -4,11 +4,15 @@ import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
+import com.artsolo.bookswap.models.Book;
+import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.services.BookService;
-import com.artsolo.bookswap.services.ReviewService;
+import com.artsolo.bookswap.services.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -19,17 +23,20 @@ import java.util.Map;
 @RequestMapping("/api/v1/book")
 public class BookController {
     private final BookService bookService;
-    private final ReviewService reviewService;
+    private final UserService userService;
 
-    public BookController(BookService bookService, ReviewService reviewService) {
+    public BookController(BookService bookService, UserService userService) {
         this.bookService = bookService;
-        this.reviewService = reviewService;
+        this.userService = userService;
     }
 
+    @Transactional
     @PostMapping("/add")
     public ResponseEntity<?> addNewBook(@ModelAttribute AddBookRequest request, Principal currentUser) throws IOException {
         if (bookService.bookRequestIsValid(request)) {
-            if (bookService.addNewBook(request, currentUser)) {
+            User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+            if (bookService.addNewBook(request, user)) {
+                userService.increaseUserPoints(10, user);
                 return ResponseEntity.ok().body(MessageResponse.builder().message("Book was added successfully").build());
             }
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
@@ -39,13 +46,33 @@ public class BookController {
                 HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
     }
 
+    @Transactional
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteBookById(@PathVariable Long id) {
-        if (bookService.deleteBook(bookService.getBookById(id))) {
-            return ResponseEntity.ok().body(MessageResponse.builder().message("Book was deleted successfully").build());
+    public ResponseEntity<?> deleteBookById(@PathVariable Long id, Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        Book book = bookService.getBookById(id);
+        if (bookService.userIsBookOwner(user, book)) {
+            if (bookService.deleteBook(book)) {
+                userService.decreaseUserPoints(10, user);
+                return ResponseEntity.ok().body(MessageResponse.builder().message("Book was deleted successfully").build());
+            }
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(), "Book still exist")).build());
         }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Book still exist")).build());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.FORBIDDEN.value(), "You are not the owner of the book to perform this action")).build());
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateBookById(@PathVariable Long id, @ModelAttribute UpdateBookRequest request, Principal currentUser) throws IOException {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        Book book = bookService.getBookById(id);
+        if (bookService.userIsBookOwner(user, book)) {
+            bookService.updateBook(book, request);
+            return ResponseEntity.ok().body(MessageResponse.builder().message("Book was updated successfully").build());
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.FORBIDDEN.value(), "You are not the owner of the book to perform this action")).build());
     }
 
     @GetMapping("/get/{id}")
@@ -85,25 +112,6 @@ public class BookController {
     @GetMapping("/photo")
     public ResponseEntity<?> getBookPhoto(@RequestParam("id") Long id) {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(bookService.getBookPhoto(bookService.getBookById(id)));
-    }
-
-    @PostMapping("/{id}/add-review")
-    public ResponseEntity<?> addBookReview(@PathVariable Long id, @RequestBody ReviewRequest request, Principal currentUser) {
-        if (request.getReview() != null && request.getRating() != null) {
-            if (reviewService.addBookRevive(bookService.getBookById(id), request, currentUser)){
-                return ResponseEntity.ok().body(new MessageResponse("Review was added successfully"));
-            }
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Failed to add review")).build());
-        }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
-    }
-
-    @GetMapping("/{id}/get-reviews")
-    public ResponseEntity<?> getAllBookReviews(@PathVariable Long id) {
-        return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(reviewService.getAllBookReviews(bookService.getBookById(id))).build());
     }
 
 }

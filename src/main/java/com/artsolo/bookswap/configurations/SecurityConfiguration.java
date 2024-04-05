@@ -52,7 +52,9 @@ public class SecurityConfiguration {
                                 .requestMatchers("/api/v1/genre/delete/**",
                                         "/api/v1/language/delete/**",
                                         "/api/v1/quality/delete/**",
-                                        "/api/v1/status/delete/**").hasAuthority("ADMINISTRATOR")
+                                        "/api/v1/status/delete/**",
+                                        "/api/v1/user/change-activity/**",
+                                        "/api/v1/user/set-role/**").hasAuthority("ADMINISTRATOR")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
