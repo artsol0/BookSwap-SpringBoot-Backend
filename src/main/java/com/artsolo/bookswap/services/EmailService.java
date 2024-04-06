@@ -8,13 +8,19 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.nio.charset.StandardCharsets;
 
 @Service
 public class EmailService implements EmailSender {
     private final static Logger logger = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender javaMailSender;
-    public EmailService(JavaMailSender javaMailSender) {
+    private final TemplateEngine templateEngine;
+    public EmailService(JavaMailSender javaMailSender, TemplateEngine templateEngine) {
         this.javaMailSender = javaMailSender;
+        this.templateEngine = templateEngine;
     }
 
     @Override
@@ -22,7 +28,7 @@ public class EmailService implements EmailSender {
     public void send(String to, String subject, String text) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,"utf-8");
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, StandardCharsets.UTF_8.name());
             mimeMessageHelper.setFrom("jojekgobbany@gmail.com");
             mimeMessageHelper.setTo(to);
             mimeMessageHelper.setSubject(subject);
@@ -33,4 +39,53 @@ public class EmailService implements EmailSender {
             throw new IllegalStateException("Error occurred during sending message");
         }
     }
+
+    @Override
+    @Async
+    public void sendEmailConfirmation(String to, String name, String jwtToken) {
+        try {
+            Context context = new Context();
+            context.setVariable("name", name);
+            context.setVariable("token", jwtToken);
+
+            String process = templateEngine.process("confirm-email", context);
+
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, StandardCharsets.UTF_8.name());
+            mimeMessageHelper.setFrom("jojekgobbany@gmail.com");
+            mimeMessageHelper.setTo(to);
+            mimeMessageHelper.setSubject("Confirm your email");
+            mimeMessageHelper.setText(process, true);
+
+            javaMailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            logger.error("Error occurred during sending message", e);
+            throw new IllegalStateException("Error occurred during sending message");
+        }
+    }
+
+    @Override
+    public void sendResetPasswordConfirmation(String to, String name, String jwtToken) {
+        try {
+            Context context = new Context();
+            context.setVariable("name", name);
+            context.setVariable("token", jwtToken);
+
+            String process = templateEngine.process("reset-password", context);
+
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, StandardCharsets.UTF_8.name());
+            mimeMessageHelper.setFrom("jojekgobbany@gmail.com");
+            mimeMessageHelper.setTo(to);
+            mimeMessageHelper.setSubject("Reset your password");
+            mimeMessageHelper.setText(process, true);
+
+            javaMailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            logger.error("Error occurred during sending message", e);
+            throw new IllegalStateException("Error occurred during sending message");
+        }
+    }
+
+
 }

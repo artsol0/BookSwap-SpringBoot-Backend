@@ -26,7 +26,7 @@ public class AuthenticationController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         if (request.getNickname() != null && request.getEmail() != null && request.getPassword() != null) {
             if (authenticationService.register(request)) {
-                return ResponseEntity.ok().body(MessageResponse.builder().message("User registered successfully").build());
+                return ResponseEntity.ok().body(MessageResponse.builder().message("The confirmation link was sent to your email address").build());
             }
             return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder().error(new ErrorDescription(
                     HttpStatus.CONFLICT.value(), "Email address is already taken")).build());
