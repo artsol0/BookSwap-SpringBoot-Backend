@@ -79,4 +79,8 @@ public class ReviewService {
         }
         return responses;
     }
+
+    public boolean userIsReviewWriter(User user, Review review) {
+        return review.getUser().getId().equals(user.getId());
+    }
 }

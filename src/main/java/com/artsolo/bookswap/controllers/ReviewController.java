@@ -6,10 +6,13 @@ import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.models.Review;
+import com.artsolo.bookswap.models.User;
+import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.ReviewService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -55,26 +58,40 @@ public class ReviewController {
 
     @PutMapping("/update/{userId}/{bookId}")
     public ResponseEntity<?> updateReviewById(@PathVariable Long userId, @PathVariable Long bookId,
-                                              @RequestBody ReviewRequest request) {
+                                              @RequestBody ReviewRequest request, Principal currentUser) {
         if (request.getReview() != null && request.getRating() != null) {
-            reviewService.updateReview(
-                    reviewService.getReviewById(userId, bookId),
-                    request.getRating(),
-                    request.getReview()
-            );
-            return ResponseEntity.ok().body(MessageResponse.builder().message("Review was updated").build());
+            User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+            Review review = reviewService.getReviewById(userId, bookId);
+            if (reviewService.userIsReviewWriter(user, review) ||
+                    (user.getRole().equals(Role.ADMINISTRATOR) ||
+                    user.getRole().equals(Role.MODERATOR))) {
+                reviewService.updateReview(
+                        review,
+                        request.getRating(),
+                        request.getReview()
+                );
+                return ResponseEntity.ok().body(MessageResponse.builder().message("Review was updated").build());
+            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.FORBIDDEN.value(), "You are not review writer")).build());
         }
         return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
                 HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
     }
 
     @DeleteMapping("/delete/{userId}/{bookId}")
-    public ResponseEntity<?> deleteReviewById(@PathVariable Long userId, @PathVariable Long bookId) {
+    public ResponseEntity<?> deleteReviewById(@PathVariable Long userId, @PathVariable Long bookId,
+                                              Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Review review = reviewService.getReviewById(userId, bookId);
-        if (reviewService.deleteRevive(review)) {
-            return ResponseEntity.ok().body(MessageResponse.builder().message("Review was deleted successfully").build());
+        if (reviewService.userIsReviewWriter(user, review) || user.getRole().equals(Role.ADMINISTRATOR)) {
+            if (reviewService.deleteRevive(review)) {
+                return ResponseEntity.ok().body(MessageResponse.builder().message("Review was deleted successfully").build());
+            }
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(), "Review still in the library")).build());
         }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Review still in the library")).build());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.FORBIDDEN.value(), "You are not review writer")).build());
     }
 }

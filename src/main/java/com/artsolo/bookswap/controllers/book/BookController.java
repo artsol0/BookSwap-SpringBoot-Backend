@@ -6,6 +6,7 @@ import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.models.Book;
 import com.artsolo.bookswap.models.User;
+import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.UserService;
 import jakarta.transaction.Transactional;
@@ -51,7 +52,7 @@ public class BookController {
     public ResponseEntity<?> deleteBookById(@PathVariable Long id, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Book book = bookService.getBookById(id);
-        if (bookService.userIsBookOwner(user, book)) {
+        if (bookService.userIsBookOwner(user, book) || user.getRole().equals(Role.ADMINISTRATOR)) {
             if (bookService.deleteBook(book)) {
                 userService.decreaseUserPoints(10, user);
                 return ResponseEntity.ok().body(MessageResponse.builder().message("Book was deleted successfully").build());
@@ -67,7 +68,7 @@ public class BookController {
     public ResponseEntity<?> updateBookById(@PathVariable Long id, @ModelAttribute UpdateBookRequest request, Principal currentUser) throws IOException {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Book book = bookService.getBookById(id);
-        if (bookService.userIsBookOwner(user, book)) {
+        if (bookService.userIsBookOwner(user, book) || (user.getRole().equals(Role.ADMINISTRATOR) || user.getRole().equals(Role.MODERATOR))) {
             bookService.updateBook(book, request);
             return ResponseEntity.ok().body(MessageResponse.builder().message("Book was updated successfully").build());
         }
