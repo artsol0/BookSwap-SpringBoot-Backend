@@ -15,6 +15,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -37,7 +40,7 @@ public class AuthenticationService {
         this.emailSender = emailSender;
     }
 
-    public boolean register(RegisterRequest request) {
+    public boolean register(RegisterRequest request) throws IOException {
         if (userRepository.findByEmail(request.getEmail()).isEmpty()) {
             var user = User.builder()
                     .nickname(request.getNickname())
@@ -47,6 +50,7 @@ public class AuthenticationService {
                     .activity(Boolean.FALSE)
                     .registrationDate(LocalDate.now())
                     .points(0)
+                    .photo(Files.readAllBytes(Paths.get("./src/main/resources/static/default-avatar-icon.jpg")))
                     .country("Unknown")
                     .city("Unknown")
                     .build();

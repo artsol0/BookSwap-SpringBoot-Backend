@@ -15,6 +15,7 @@ import java.util.List;
 public class UpdateBookRequest {
     private String title;
     private String author;
+    private String description;
     private List<Long> genreIds;
     private Long qualityId;
     private Long statusId;

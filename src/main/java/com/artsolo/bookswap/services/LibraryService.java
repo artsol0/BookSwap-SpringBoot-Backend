@@ -49,6 +49,7 @@ public class LibraryService {
                     .id(library.getBook().getId())
                     .title(library.getBook().getTitle())
                     .author(library.getBook().getAuthor())
+                    .description(library.getBook().getDescription())
                     .genres(library.getBook().getGenres().stream().map(Genre::getGenre).collect(Collectors.toList()))
                     .quality(library.getBook().getQuality().getQuality())
                     .status(library.getBook().getStatus().getStatus())

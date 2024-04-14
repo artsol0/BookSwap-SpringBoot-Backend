@@ -36,6 +36,7 @@ public class BookService {
                         .id(book.getId())
                         .title(book.getTitle())
                         .author(book.getAuthor())
+                        .description(book.getDescription())
                         .genres(book.getGenres().stream().map(Genre::getGenre).collect(Collectors.toList()))
                         .quality(book.getQuality().getQuality())
                         .status(book.getStatus().getStatus())
@@ -90,6 +91,7 @@ public class BookService {
         Book book = Book.builder()
                 .title(addBookRequest.getTitle())
                 .author(addBookRequest.getAuthor())
+                .description(addBookRequest.getDescription())
                 .genres(genres)
                 .quality(quality)
                 .status(status)
@@ -111,6 +113,7 @@ public class BookService {
     public void updateBook(Book book, UpdateBookRequest request) throws IOException, NoDataFoundException {
         book.setTitle(request.getTitle());
         book.setAuthor(request.getAuthor());
+        book.setDescription(request.getDescription());
         book.setGenres(request.getGenreIds().stream().map(genreService::getGenreById).collect(Collectors.toList()));
         book.setQuality(qualityService.getQualityById(request.getQualityId()));
         book.setStatus(statusService.getStatusById(request.getStatusId()));
@@ -123,9 +126,9 @@ public class BookService {
 
     public boolean bookRequestIsValid(AddBookRequest request) {
         return (request.getTitle() != null && request.getAuthor() != null
-                && request.getGenreIds() != null && request.getQualityId() != null
-                && request.getStatusId() != null && request.getLanguageId() != null
-                && request.getPhoto() != null);
+                && request.getDescription() != null && request.getGenreIds() != null
+                && request.getQualityId() != null && request.getStatusId() != null
+                && request.getLanguageId() != null && request.getPhoto() != null);
     }
 
     public boolean userIsBookOwner(User user, Book book) {

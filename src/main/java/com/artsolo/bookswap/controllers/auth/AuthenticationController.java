@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthenticationController {
@@ -23,7 +25,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) throws IOException {
         if (request.getNickname() != null && request.getEmail() != null && request.getPassword() != null) {
             if (authenticationService.register(request)) {
                 return ResponseEntity.ok().body(MessageResponse.builder().message("The confirmation link was sent to your email address").build());

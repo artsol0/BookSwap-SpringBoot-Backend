@@ -15,6 +15,7 @@ public class BookResponse {
     private Long id;
     private String title;
     private String author;
+    private String description;
     private List<String> genres;
     private String quality;
     private String status;

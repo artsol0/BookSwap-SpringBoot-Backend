@@ -89,14 +89,14 @@ public class UserService {
 
     public String changeUserPassword(Map<String, String> request, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        if(passwordEncoder.matches(request.get("old-password"), user.getPassword())) {
-            if (!passwordEncoder.matches(request.get("new-password"), user.getPassword())) {
-                user.setPassword(passwordEncoder.encode(request.get("new-password")));
+        if(passwordEncoder.matches(request.get("current_password"), user.getPassword())) {
+            if (!passwordEncoder.matches(request.get("new_password"), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(request.get("new_password")));
                 userRepository.save(user);
                 return "Password changed successfully";
             }
             return "New password must not match previous";
         }
-        return "Password not confirmed";
+        return "Current password not confirmed";
     }
 }

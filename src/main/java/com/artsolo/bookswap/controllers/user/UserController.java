@@ -4,11 +4,13 @@ import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
+import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.services.JwtService;
 import com.artsolo.bookswap.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +32,12 @@ public class UserController {
         return ResponseEntity.ok().body(SuccessResponse.builder().data(userResponse).build());
     }
 
+    @GetMapping("/get/current")
+    public ResponseEntity<?> getCurrentUser(Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        return ResponseEntity.ok().body(SuccessResponse.builder().data(userService.getUserResponse(user)).build());
+    }
+
     @PutMapping("/change-location")
     public ResponseEntity<?> changeLocation(@RequestBody Map<String, String> request, Principal currentUser) {
         if (request.get("country") != null && request.get("city") != null) {
@@ -41,7 +49,7 @@ public class UserController {
     }
 
     @PutMapping("/change-photo")
-    public ResponseEntity<?> changePhoto(@RequestPart("photo") MultipartFile photo, Principal currentUser) {
+    public ResponseEntity<?> changePhoto(@RequestParam("photo") MultipartFile photo, Principal currentUser) {
         userService.changeUserPhoto(photo, currentUser);
         return ResponseEntity.ok().body(MessageResponse.builder().message("Photo changed successfully").build());
     }
@@ -68,7 +76,7 @@ public class UserController {
 
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody Map<String, String> request, Principal currentUser) {
-        if (request.get("old-password") != null && request.get("new-password") != null) {
+        if (request.get("current_password") != null && request.get("new_password") != null) {
             String result = userService.changeUserPassword(request, currentUser);
             if (result.contains("successfully")) {
                 return ResponseEntity.ok().body(MessageResponse.builder().message(result).build());

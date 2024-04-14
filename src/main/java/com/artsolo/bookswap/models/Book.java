@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.Length;
 
 import java.util.List;
 
@@ -21,6 +22,8 @@ public class Book {
     private Long id;
     private String title;
     private String author;
+    @Column(length = 1000)
+    private String description;
 
     @ManyToMany
     @JoinTable(
