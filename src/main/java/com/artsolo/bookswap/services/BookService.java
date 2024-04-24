@@ -1,6 +1,7 @@
 package com.artsolo.bookswap.services;
 
 import com.artsolo.bookswap.controllers.book.AddBookRequest;
+import com.artsolo.bookswap.controllers.book.BookAdditionalInfo;
 import com.artsolo.bookswap.controllers.book.BookResponse;
 import com.artsolo.bookswap.controllers.book.UpdateBookRequest;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
@@ -131,7 +132,26 @@ public class BookService {
                 && request.getLanguageId() != null && request.getPhoto() != null);
     }
 
+    public BookAdditionalInfo getBookAdditionalInfo(User user, Book book) {
+        return BookAdditionalInfo.builder()
+                .isUserBookOwner(userIsBookOwner(user, book))
+                .isBookInWishlist(isBookInWishlist(user, book))
+                .isBookInExchange(isBookInExchange(user, book))
+                .build();
+    }
+
     public boolean userIsBookOwner(User user, Book book) {
-        return user.getLibrary().stream().map(Library::getBook).anyMatch(libraryBook -> libraryBook.getId().equals(book.getId()));
+        return user.getLibrary().stream().map(Library::getBook).anyMatch(libraryBook ->
+                libraryBook.getId().equals(book.getId()));
+    }
+
+    public boolean isBookInWishlist(User user, Book book) {
+        return user.getWishlist().stream().map(Wishlist::getBook).anyMatch(wishlistBook ->
+                wishlistBook.getId().equals(book.getId()));
+    }
+
+    public boolean isBookInExchange(User user, Book book) {
+        return user.getInitiations().stream().map(Exchange::getBook).anyMatch(exchangedBook ->
+                exchangedBook.getId().equals(book.getId()));
     }
 }

@@ -16,6 +16,7 @@ public class Review {
     @EmbeddedId
     private CompositeKey reviewId;
     private Integer rating;
+    @Column(length = 1000)
     private String review;
 
     @ManyToOne

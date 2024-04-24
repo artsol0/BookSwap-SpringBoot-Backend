@@ -9,6 +9,8 @@ import com.artsolo.bookswap.models.Review;
 import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.repositoryes.BookRepository;
 import com.artsolo.bookswap.repositoryes.ReviewRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,7 @@ public class ReviewService {
                 .userId(review.getReviewId().getUser_id())
                 .bookId(review.getReviewId().getBook_id())
                 .nickname(review.getUser().getNickname())
+                .userPhoto(review.getUser().getPhoto())
                 .rating(review.getRating())
                 .review(review.getReview())
                 .build();
@@ -73,11 +76,22 @@ public class ReviewService {
                     .userId(review.getReviewId().getUser_id())
                     .bookId(review.getReviewId().getBook_id())
                     .nickname(review.getUser().getNickname())
+                    .userPhoto(review.getUser().getPhoto())
                     .rating(review.getRating())
                     .review(review.getReview())
                     .build());
         }
         return responses;
+    }
+
+    public Page<ReviewResponse> getAllBookReviewsPaged(Long bookId, Pageable pageable) {
+        Page<Review> reviewPage = reviewRepository.findByBookId(bookId, pageable);
+        return reviewPage.map(this::getReviewResponse);
+    }
+
+    public boolean reviewIsExist(Long userId, Long bookId) {
+        CompositeKey compositeKey = new CompositeKey(userId, bookId);
+        return reviewRepository.existsById(compositeKey);
     }
 
     public boolean userIsReviewWriter(User user, Review review) {

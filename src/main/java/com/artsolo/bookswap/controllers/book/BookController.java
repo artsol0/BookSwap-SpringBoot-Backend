@@ -47,14 +47,12 @@ public class BookController {
                 HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
     }
 
-    @Transactional
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteBookById(@PathVariable Long id, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Book book = bookService.getBookById(id);
         if (bookService.userIsBookOwner(user, book) || user.getRole().equals(Role.ADMINISTRATOR)) {
             if (bookService.deleteBook(book)) {
-                userService.decreaseUserPoints(10, user);
                 return ResponseEntity.ok().body(MessageResponse.builder().message("Book was deleted successfully").build());
             }
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
@@ -114,5 +112,14 @@ public class BookController {
     public ResponseEntity<?> getBookPhoto(@RequestParam("id") Long id) {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(bookService.getBookPhoto(bookService.getBookById(id)));
     }
+
+    @GetMapping("/get/{id}/additional-info")
+    public ResponseEntity<?> getBookAdditionalInfo(@PathVariable("id") Long id, Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        Book book = bookService.getBookById(id);
+        return ResponseEntity.ok()
+                .body(SuccessResponse.builder().data(bookService.getBookAdditionalInfo(user, book)).build());
+    }
+
 
 }

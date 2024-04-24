@@ -9,11 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReviewResponse {
-    private Long userId;
-    private Long bookId;
-    private String nickname;
-    private byte[] userPhoto;
-    private Integer rating;
-    private String review;
+public class BookAdditionalInfo {
+    private boolean isUserBookOwner;
+    private boolean isBookInWishlist;
+    private boolean isBookInExchange;
 }

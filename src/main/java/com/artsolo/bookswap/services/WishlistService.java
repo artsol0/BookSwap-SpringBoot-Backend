@@ -45,6 +45,7 @@ public class WishlistService {
                             .id(wishlist.getBook().getId())
                             .title(wishlist.getBook().getTitle())
                             .author(wishlist.getBook().getAuthor())
+                            .description(wishlist.getBook().getDescription())
                             .genres(wishlist.getBook().getGenres().stream().map(Genre::getGenre).collect(Collectors.toList()))
                             .quality(wishlist.getBook().getQuality().getQuality())
                             .status(wishlist.getBook().getStatus().getStatus())

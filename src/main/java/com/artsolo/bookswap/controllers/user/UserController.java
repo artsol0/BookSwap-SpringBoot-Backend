@@ -38,6 +38,12 @@ public class UserController {
         return ResponseEntity.ok().body(SuccessResponse.builder().data(userService.getUserResponse(user)).build());
     }
 
+    @GetMapping("/get/current-id")
+    public ResponseEntity<?> getCurrentUserId(Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        return ResponseEntity.ok().body(SuccessResponse.builder().data(user.getId()).build());
+    }
+
     @PutMapping("/change-location")
     public ResponseEntity<?> changeLocation(@RequestBody Map<String, String> request, Principal currentUser) {
         if (request.get("country") != null && request.get("city") != null) {
