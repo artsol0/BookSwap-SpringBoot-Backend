@@ -10,5 +10,5 @@ import java.util.Optional;
 
 public interface LibraryRepository extends JpaRepository<Library, CompositeKey> {
     List<Library> findAllByUserId(Long userId);
-    List<Library> findAllByBookId(Long bookId);
+    Library findByBookId(Long bookId);
 }

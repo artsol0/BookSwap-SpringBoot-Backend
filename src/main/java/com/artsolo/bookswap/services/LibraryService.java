@@ -28,6 +28,8 @@ public class LibraryService {
                 new NoDataFoundException("Language", compositeKey.getUser_id(), compositeKey.getBook_id()));
     }
 
+    public Library getLibraryByBookId(Long bookId) {return libraryRepository.findByBookId(bookId);}
+
     public boolean addNewBookToUserLibrary(User user, Book book) {
         Library library = new Library(new CompositeKey(user.getId(), book.getId()), user, book);
         library = libraryRepository.save(library);

@@ -20,10 +20,11 @@ public class ExchangeService {
     private final LibraryService libraryService;
     private final UserService userService;
 
-    public boolean createNewExchange(User recipient, User initiator, Book book) {
+    public boolean createNewExchange(User initiator, Book book) {
+        Library library = libraryService.getLibraryByBookId(book.getId());
         Exchange exchange = Exchange.builder()
                 .initiator(initiator)
-                .recipient(recipient)
+                .recipient(library.getUser())
                 .book(book)
                 .confirmed(Boolean.FALSE)
                 .build();
@@ -86,8 +87,6 @@ public class ExchangeService {
     public boolean confirmExchange(Exchange exchange, Library library) {
         if (libraryService.removeBookFromUserLibrary(library)) {
             if (libraryService.addNewBookToUserLibrary(exchange.getInitiator(), exchange.getBook())) {
-                userService.increaseUserPoints(15, exchange.getRecipient());
-                userService.decreaseUserPoints(20, exchange.getInitiator());
                 exchange.setConfirmed(Boolean.TRUE);
                 exchange = exchangeRepository.save(exchange);
                 return exchange.getConfirmed();

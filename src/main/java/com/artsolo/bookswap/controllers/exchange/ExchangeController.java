@@ -34,24 +34,19 @@ public class ExchangeController {
         this.libraryService = libraryService;
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createNewExchange(@RequestBody Map<String,String> request, Principal currentUser) {
-        if (request.get("recipientId") != null && request.get("bookId") != null) {
-            User recipient = userService.getUserById(Long.parseLong(request.get("recipientId")));
-            Book book = bookService.getBookById(Long.parseLong(request.get("bookId")));
-            User initiator = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-            if (initiator.getPoints() >= 20) {
-                if (exchangeService.createNewExchange(recipient, initiator, book)) {
-                    return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was created successfully").build());
-                }
-                return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                        HttpStatus.BAD_REQUEST.value(), "Failed to create new exchange")).build());
+    @PostMapping("/create/{bookId}")
+    public ResponseEntity<?> createNewExchange(@PathVariable Long bookId, Principal currentUser) {
+        Book book = bookService.getBookById(bookId);
+        User initiator = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        if (initiator.getPoints() >= 20) {
+            if (exchangeService.createNewExchange(initiator, book)) {
+                return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was created successfully").build());
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.NOT_FOUND.value(), "You don't have enough points")).build());
-            }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
+            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
+                    HttpStatus.BAD_REQUEST.value(), "Failed to create new exchange")).build());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.NOT_FOUND.value(), "You don't have enough points")).build());
     }
 
     @DeleteMapping("/delete/{id}")

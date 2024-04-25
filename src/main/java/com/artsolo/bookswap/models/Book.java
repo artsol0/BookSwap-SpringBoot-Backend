@@ -45,7 +45,7 @@ public class Book {
     private Language language;
 
     @Lob
-    @Column(columnDefinition="BLOB")
+    @Column(columnDefinition="LONGBLOB")
     private byte[] photo;
 
     @OneToMany(mappedBy = "book", orphanRemoval = true)

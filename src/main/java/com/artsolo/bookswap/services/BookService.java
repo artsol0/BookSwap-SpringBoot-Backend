@@ -105,8 +105,8 @@ public class BookService {
     }
 
     public boolean deleteBook(Book book) {
-        List<Library> libraries = libraryRepository.findAllByBookId(book.getId());
-        libraryRepository.deleteAll(libraries);
+        Library library = libraryRepository.findByBookId(book.getId());
+        libraryRepository.delete(library);
         bookRepository.deleteById(book.getId());
         return !bookRepository.existsById(book.getId());
     }
