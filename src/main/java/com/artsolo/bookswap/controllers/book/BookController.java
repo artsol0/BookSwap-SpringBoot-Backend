@@ -10,6 +10,8 @@ import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.UserService;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -93,6 +95,21 @@ public class BookController {
     @GetMapping("/get/by/keyword")
     public ResponseEntity<?> getBooksByTitleOrAuthor(@RequestParam("word") String keyword) {
         return ResponseEntity.ok().body(SuccessResponse.builder().data(bookService.getBooksByTitleOrAuthor(keyword)).build());
+    }
+
+    @GetMapping("/get/all")
+    public ResponseEntity<?> getAllBooks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "") String keyword)
+    {
+        Pageable pageable =  PageRequest.of(page, 10);
+        if (keyword.isEmpty()) {
+            return ResponseEntity.ok().body(SuccessResponse.builder()
+                    .data(bookService.getAllBooksPaged(pageable)).build());
+        } else {
+            return ResponseEntity.ok().body(SuccessResponse.builder()
+                    .data(bookService.getAllBooksPagedByKeyword(pageable, keyword)).build());
+        }
     }
 
     @GetMapping("/get/by/genre/and/language")

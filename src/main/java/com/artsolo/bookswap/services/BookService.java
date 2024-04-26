@@ -8,6 +8,8 @@ import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,16 @@ public class BookService {
 
     public Book getBookById(Long id) {
         return bookRepository.findById(id).orElseThrow(() -> new NoDataFoundException("Book", id));
+    }
+
+    public Page<BookResponse> getAllBooksPaged(Pageable pageable) {
+        Page<Book> bookPage = bookRepository.findAll(pageable);
+        return bookPage.map(this::getBookResponse);
+    }
+
+    public Page<BookResponse> getAllBooksPagedByKeyword(Pageable pageable, String keyword) {
+        Page<Book> bookPage = bookRepository.findByTitleOrAuthorContaining(pageable, keyword);
+        return bookPage.map(this::getBookResponse);
     }
 
     public BookResponse getBookResponse(Book book) {
