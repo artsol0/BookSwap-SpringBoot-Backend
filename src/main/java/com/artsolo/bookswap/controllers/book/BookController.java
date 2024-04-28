@@ -1,5 +1,6 @@
 package com.artsolo.bookswap.controllers.book;
 
+import com.artsolo.bookswap.controllers.attributes.FindByAttributesRequest;
 import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
@@ -110,6 +111,14 @@ public class BookController {
             return ResponseEntity.ok().body(SuccessResponse.builder()
                     .data(bookService.getAllBooksPagedByKeyword(pageable, keyword)).build());
         }
+    }
+
+    @PostMapping("/get/by/attributes")
+    public ResponseEntity<?> getBooksByAttributes(@RequestParam(defaultValue = "0") int page,
+                                                  @RequestBody FindByAttributesRequest request) {
+        Pageable pageable =  PageRequest.of(page, 10);
+        return ResponseEntity.ok().body(SuccessResponse.builder()
+                .data(bookService.getAllBooksPagedByAttributes(pageable, request)).build());
     }
 
     @GetMapping("/get/by/genre/and/language")

@@ -1,5 +1,6 @@
 package com.artsolo.bookswap.services;
 
+import com.artsolo.bookswap.controllers.attributes.FindByAttributesRequest;
 import com.artsolo.bookswap.controllers.book.AddBookRequest;
 import com.artsolo.bookswap.controllers.book.BookAdditionalInfo;
 import com.artsolo.bookswap.controllers.book.BookResponse;
@@ -7,9 +8,12 @@ import com.artsolo.bookswap.controllers.book.UpdateBookRequest;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
+import com.artsolo.bookswap.specifications.BookSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +21,10 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.springframework.data.jpa.domain.Specification.where;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +48,16 @@ public class BookService {
 
     public Page<BookResponse> getAllBooksPagedByKeyword(Pageable pageable, String keyword) {
         Page<Book> bookPage = bookRepository.findByTitleOrAuthorContaining(pageable, keyword);
+        return bookPage.map(this::getBookResponse);
+    }
+
+    public Page<BookResponse> getAllBooksPagedByAttributes(Pageable pageable, FindByAttributesRequest request) {
+        Specification<Book> specification = where(BookSpecification.hasGenres(request.getGenreIds())
+                .and(BookSpecification.hasQuality(request.getQualityId()))
+                .and(BookSpecification.hasStatus(request.getStatusId()))
+                .and(BookSpecification.hasLanguage(request.getLanguageId())));
+
+        Page<Book> bookPage = bookRepository.findAll(specification, pageable);
         return bookPage.map(this::getBookResponse);
     }
 

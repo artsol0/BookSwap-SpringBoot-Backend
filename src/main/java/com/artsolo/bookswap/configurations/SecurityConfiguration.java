@@ -45,6 +45,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/api/v1/auth/**", "/api/v1/forgot-password/**").permitAll()
                                 .requestMatchers(HttpMethod.GET).permitAll()
+                                .requestMatchers("/api/v1/book/get/by/attributes").permitAll()
                                 .requestMatchers("/api/v1/genre/add",
                                         "/api/v1/language/add",
                                         "/api/v1/quality/add",
