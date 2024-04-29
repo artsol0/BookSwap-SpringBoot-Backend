@@ -39,8 +39,11 @@ public class ExchangeService {
     public ExchangeResponse getExchangeResponse(Exchange exchange) {
         return ExchangeResponse.builder()
                 .id(exchange.getId())
+                .initiatorId(exchange.getInitiator().getId())
                 .initiator(exchange.getInitiator().getNickname())
+                .recipientId(exchange.getRecipient().getId())
                 .recipient(exchange.getRecipient().getNickname())
+                .bookId(exchange.getBook().getId())
                 .book(exchange.getBook().getTitle())
                 .confirmed(exchange.getConfirmed())
                 .build();
@@ -51,13 +54,7 @@ public class ExchangeService {
         List<ExchangeResponse> exchangeResponses = new ArrayList<>();
         List<Exchange> exchanges = exchangeRepository.findAllByInitiatorId(user.getId());
         for (Exchange exchange : exchanges) {
-            exchangeResponses.add(ExchangeResponse.builder()
-                            .id(exchange.getId())
-                            .initiator(exchange.getInitiator().getNickname())
-                            .recipient(exchange.getRecipient().getNickname())
-                            .book(exchange.getBook().getTitle())
-                            .confirmed(exchange.getConfirmed())
-                            .build());
+            exchangeResponses.add(getExchangeResponse(exchange));
         }
         return exchangeResponses;
     }
@@ -67,13 +64,7 @@ public class ExchangeService {
         List<ExchangeResponse> exchangeResponses = new ArrayList<>();
         List<Exchange> exchanges = exchangeRepository.findAllByRecipientId(user.getId());
         for (Exchange exchange : exchanges) {
-            exchangeResponses.add(ExchangeResponse.builder()
-                    .id(exchange.getId())
-                    .initiator(exchange.getInitiator().getNickname())
-                    .recipient(exchange.getRecipient().getNickname())
-                    .book(exchange.getBook().getTitle())
-                    .confirmed(exchange.getConfirmed())
-                    .build());
+            exchangeResponses.add(getExchangeResponse(exchange));
         }
         return exchangeResponses;
     }

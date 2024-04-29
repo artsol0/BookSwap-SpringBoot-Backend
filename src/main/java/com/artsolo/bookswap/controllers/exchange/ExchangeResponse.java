@@ -11,8 +11,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ExchangeResponse {
     private Long id;
+    private Long initiatorId;
     private String initiator;
+    private Long recipientId;
     private String recipient;
+    private Long bookId;
     private String book;
     private Boolean confirmed;
 }
