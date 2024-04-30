@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,5 +19,4 @@ public class UpdateBookRequest {
     private Long qualityId;
     private Long statusId;
     private Long languageId;
-    private MultipartFile photo;
 }

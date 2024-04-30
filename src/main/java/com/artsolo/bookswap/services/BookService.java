@@ -10,22 +10,21 @@ import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
 import com.artsolo.bookswap.specifications.BookSpecification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.jpa.domain.Specification.where;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookService {
@@ -140,7 +139,7 @@ public class BookService {
         return !bookRepository.existsById(book.getId());
     }
 
-    public void updateBook(Book book, UpdateBookRequest request) throws IOException, NoDataFoundException {
+    public void updateBook(Book book, UpdateBookRequest request) throws NoDataFoundException {
         book.setTitle(request.getTitle());
         book.setAuthor(request.getAuthor());
         book.setDescription(request.getDescription());
@@ -148,8 +147,17 @@ public class BookService {
         book.setQuality(qualityService.getQualityById(request.getQualityId()));
         book.setStatus(statusService.getStatusById(request.getStatusId()));
         book.setLanguage(languageService.getLanguageById(request.getLanguageId()));
-        book.setPhoto(request.getPhoto().getBytes());
         bookRepository.save(book);
+    }
+
+    public void changeBookPhoto(Book book, MultipartFile photo) {
+        try {
+            byte[] newPhoto = photo.getBytes();
+            book.setPhoto(newPhoto);
+            bookRepository.save(book);
+        } catch (IOException e) {
+            log.error("Error occurred during changing user photo", e);
+        }
     }
 
     public byte[] getBookPhoto(Book book) {return book.getPhoto();}

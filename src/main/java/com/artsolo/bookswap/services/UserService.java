@@ -1,6 +1,5 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.user.UserController;
 import com.artsolo.bookswap.controllers.user.UserResponse;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.User;
@@ -14,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 
 @Service

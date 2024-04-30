@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -72,6 +73,18 @@ public class BookController {
         if (bookService.userIsBookOwner(user, book) || (user.getRole().equals(Role.ADMINISTRATOR) || user.getRole().equals(Role.MODERATOR))) {
             bookService.updateBook(book, request);
             return ResponseEntity.ok().body(MessageResponse.builder().message("Book was updated successfully").build());
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.FORBIDDEN.value(), "You are not the owner of the book to perform this action")).build());
+    }
+
+    @PutMapping("/change-photo/{id}")
+    public ResponseEntity<?> changeBookPhoto(@PathVariable Long id, @RequestParam("photo") MultipartFile photo, Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        Book book = bookService.getBookById(id);
+        if (bookService.userIsBookOwner(user, book) || (user.getRole().equals(Role.ADMINISTRATOR) || user.getRole().equals(Role.MODERATOR))) {
+            bookService.changeBookPhoto(book, photo);
+            return ResponseEntity.ok().body(MessageResponse.builder().message("Photo changed successfully").build());
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
                 HttpStatus.FORBIDDEN.value(), "You are not the owner of the book to perform this action")).build());
