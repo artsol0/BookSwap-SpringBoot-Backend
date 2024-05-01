@@ -1,6 +1,7 @@
 package com.artsolo.bookswap.controllers.chat;
 
 import com.artsolo.bookswap.models.ChatMessage;
+import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.services.ChatMessageService;
 import com.artsolo.bookswap.services.ChatRoomService;
 import lombok.RequiredArgsConstructor;
@@ -9,11 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -28,12 +31,17 @@ public class ChatController {
     @MessageMapping("/chat")
     public void sendMessage(@Payload MessageRequest messageRequest) {
         ChatMessage savedMsg = chatMessageService.sendMessage(messageRequest);
-        simpMessagingTemplate.convertAndSend(String.valueOf(savedMsg.getChatRoom().getReceiver().getId()), savedMsg.getContent());
+        simpMessagingTemplate.convertAndSendToUser(
+                savedMsg.getChatRoom().getReceiver().getNickname(),
+                "/queue/messages",
+                chatMessageService.getMessageResponse(savedMsg)
+        );
     }
 
-    @GetMapping("get/chats/{userId}")
-    public ResponseEntity<List<ChatRoomResponse>> getAllChats(@PathVariable("userId") Long userId) {
-        return ResponseEntity.ok(chatRoomService.getChatRooms(userId));
+    @GetMapping("/get/chats")
+    public ResponseEntity<List<ChatRoomResponse>> getAllChats(Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        return ResponseEntity.ok(chatRoomService.getChatRooms(user.getId()));
     }
 
     @GetMapping("/messages/{senderId}/{receiverId}")

@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class ChatRoomResponse {
     private Long receiverId;
     private String nickname;
+    private byte[] photo;
 }

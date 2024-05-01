@@ -1,6 +1,8 @@
 package com.artsolo.bookswap.configurations;
 
 import com.artsolo.bookswap.repositoryes.UserRepository;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,6 +12,11 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.codec.Hex;
+import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
+import org.springframework.security.crypto.keygen.KeyGenerators;
+import org.springframework.security.crypto.keygen.StringKeyGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
@@ -43,5 +50,12 @@ public class ApplicationConfiguration {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public TextEncryptor textEncryptor() {
+        String salt = KeyGenerators.string().generateKey();
+        byte[] password = Decoders.BASE64.decode("1d598942b3b007c39ac690a1a727aa0196259ab6ee12cb20fefb91db19123951");
+        return Encryptors.text(new String(password), salt);
     }
 }

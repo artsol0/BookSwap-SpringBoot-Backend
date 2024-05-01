@@ -38,6 +38,7 @@ public class ChatRoomService {
         return ChatRoomResponse.builder()
                 .receiverId(chatRoom.getReceiver().getId())
                 .nickname(chatRoom.getReceiver().getNickname())
+                .photo(chatRoom.getReceiver().getPhoto())
                 .build();
     }
 
