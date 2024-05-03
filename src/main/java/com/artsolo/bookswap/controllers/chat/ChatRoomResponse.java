@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ChatRoomResponse {
+    private Long id;
     private Long receiverId;
-    private String nickname;
+    private String chatName;
     private byte[] photo;
 }

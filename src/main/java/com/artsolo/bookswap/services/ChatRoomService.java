@@ -3,13 +3,13 @@ package com.artsolo.bookswap.services;
 import com.artsolo.bookswap.controllers.chat.ChatRoomResponse;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.ChatRoom;
-import com.artsolo.bookswap.models.ChatRoomKey;
+import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.repositoryes.ChatRoomRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ChatRoomService {
@@ -23,64 +23,51 @@ public class ChatRoomService {
     }
 
     public List<ChatRoomResponse> getChatRooms(Long userId) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findAllBySenderId(userId);
-        if (!chatRooms.isEmpty()) {
-            List<ChatRoomResponse> chatRoomResponses = new ArrayList<>();
-            for (ChatRoom chatRoom : chatRooms) {
-                chatRoomResponses.add(getChatRoomResponse(chatRoom));
-            }
-            return chatRoomResponses;
-        }
-        return new ArrayList<>();
+        List<ChatRoom> chatRooms = chatRoomRepository.findAllByParticipantId(userId);
+        return chatRooms.stream()
+                .map(chatRoom -> getChatRoomResponse(chatRoom, userId))
+                .collect(Collectors.toList());
     }
 
-    public ChatRoomResponse getChatRoomResponse(ChatRoom chatRoom) {
+    public ChatRoomResponse getChatRoomResponse(ChatRoom chatRoom, Long userId) {
+        User participant = chatRoom.getFirstParticipant().getId().equals(userId) ?
+                chatRoom.getSecondParticipant() : chatRoom.getFirstParticipant();
+
         return ChatRoomResponse.builder()
-                .receiverId(chatRoom.getReceiver().getId())
-                .nickname(chatRoom.getReceiver().getNickname())
-                .photo(chatRoom.getReceiver().getPhoto())
+                .id(chatRoom.getId())
+                .receiverId(participant.getId())
+                .chatName(participant.getNickname())
+                .photo(participant.getPhoto())
                 .build();
     }
 
-    public ChatRoom getChatRoomById(ChatRoomKey chatRoomKey) {
-        return chatRoomRepository.findById(chatRoomKey)
-                .orElseThrow(() -> new NoDataFoundException(
-                        "Chat room",
-                        chatRoomKey.getSender_id(),
-                        chatRoomKey.getReceiver_id())
-                );
+    public ChatRoom getChatRoomById(Long id) {
+        return chatRoomRepository.findById(id).orElseThrow(() -> new NoDataFoundException("Chat room", id));
     }
 
-    public Optional<ChatRoomKey> getChatRoomId(Long senderId, Long receiverId, boolean createNewRoomIfNotExist) {
-        return chatRoomRepository.findById(new ChatRoomKey(senderId, receiverId))
-                .map(ChatRoom::getChatRoomKey)
+    public Optional<Long> getChatRoomId(Long senderId, Long receiverId, boolean createNewRoomIfNotExist) {
+        return chatRoomRepository.findByParticipantIds(senderId, receiverId).map(ChatRoom::getId)
                 .or(() -> {
                     if (createNewRoomIfNotExist) {
-                        ChatRoomKey chatId = createChatId(senderId, receiverId);
+                        Long chatId = createChatId(senderId, receiverId);
                         return Optional.of(chatId);
                     }
                     return Optional.empty();
                 });
     }
 
-    private ChatRoomKey createChatId(Long senderId, Long receiverId) {
-        ChatRoomKey chatRoomKey = new ChatRoomKey(senderId, receiverId);
+    private Long createChatId(Long senderId, Long receiverId) {
 
-        ChatRoom senderReceiver = ChatRoom.builder()
-                .chatRoomKey(chatRoomKey)
-                .sender(userService.getUserById(senderId))
-                .receiver(userService.getUserById(receiverId))
+        ChatRoom chatRoom = ChatRoom.builder()
+                .firstParticipant(userService.getUserById(senderId))
+                .secondParticipant(userService.getUserById(receiverId))
                 .build();
 
-        ChatRoom receiverSender = ChatRoom.builder()
-                .chatRoomKey(chatRoomKey)
-                .sender(userService.getUserById(receiverId))
-                .receiver(userService.getUserById(senderId))
-                .build();
+        chatRoom = chatRoomRepository.save(chatRoom);
+        return chatRoom.getId();
+    }
 
-        chatRoomRepository.save(senderReceiver);
-        chatRoomRepository.save(receiverSender);
-
-        return chatRoomKey;
+    public boolean isUserChatParticipant(ChatRoom chatRoom, User user) {
+        return (chatRoom.getFirstParticipant().getId().equals(user.getId()) || chatRoom.getSecondParticipant().getId().equals(user.getId()));
     }
 }

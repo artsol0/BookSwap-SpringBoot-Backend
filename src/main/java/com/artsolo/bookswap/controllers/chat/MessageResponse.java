@@ -5,13 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class MessageResponse {
     private Long id;
-    private String content;
+    private Long chatId;
     private Long senderId;
-    private Long receiverId;
+    private String nickname;
+    private byte[] photo;
+    private String content;
+    private Date timestamp;
 }

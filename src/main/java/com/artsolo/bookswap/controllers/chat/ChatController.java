@@ -1,11 +1,16 @@
 package com.artsolo.bookswap.controllers.chat;
 
+import com.artsolo.bookswap.controllers.responses.ErrorDescription;
+import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.models.ChatMessage;
+import com.artsolo.bookswap.models.ChatRoom;
 import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.services.ChatMessageService;
 import com.artsolo.bookswap.services.ChatRoomService;
+import com.artsolo.bookswap.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -27,12 +32,13 @@ public class ChatController {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final ChatMessageService chatMessageService;
     private final ChatRoomService chatRoomService;
+    private final UserService userService;
 
     @MessageMapping("/chat")
     public void sendMessage(@Payload MessageRequest messageRequest) {
         ChatMessage savedMsg = chatMessageService.sendMessage(messageRequest);
         simpMessagingTemplate.convertAndSendToUser(
-                savedMsg.getChatRoom().getReceiver().getNickname(),
+                userService.getUserById(messageRequest.getReceiver_id()).getNickname(),
                 "/queue/messages",
                 chatMessageService.getMessageResponse(savedMsg)
         );
@@ -44,11 +50,15 @@ public class ChatController {
         return ResponseEntity.ok(chatRoomService.getChatRooms(user.getId()));
     }
 
-    @GetMapping("/messages/{senderId}/{receiverId}")
-    public ResponseEntity<List<MessageResponse>> findChatMessages(@PathVariable("senderId") Long senderId,
-                                                              @PathVariable("receiverId") Long receiverId
-    ) {
-        return ResponseEntity.ok(chatMessageService.getChatMessages(senderId, receiverId));
+    @GetMapping("/messages/{chatId}")
+    public ResponseEntity<?> findChatMessages(@PathVariable("chatId") Long chatId, Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        ChatRoom chatRoom = chatRoomService.getChatRoomById(chatId);
+        if (chatRoomService.isUserChatParticipant(chatRoom, user)) {
+            return ResponseEntity.ok(chatMessageService.getChatMessages(chatId));
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.FORBIDDEN.value(), "You are not the chat participant to perform this action")).build());
     }
 
 }

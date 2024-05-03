@@ -13,17 +13,17 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "chat_rooms")
 public class ChatRoom {
-    @EmbeddedId
-    private ChatRoomKey chatRoomKey;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "chat_room_id", nullable = false)
+    private Long id;
 
     @ManyToOne
-    @MapsId("sender_id")
-    @JoinColumn(name = "sender_id")
-    private User sender;
+    @JoinColumn(name = "first_participant_id")
+    private User firstParticipant;
 
     @ManyToOne
-    @MapsId("receiver_id")
-    @JoinColumn(name = "receiver_id")
-    private User receiver;
+    @JoinColumn(name = "second_participant_id")
+    private User secondParticipant;
 
 }

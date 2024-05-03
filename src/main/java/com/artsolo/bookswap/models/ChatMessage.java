@@ -19,13 +19,15 @@ public class ChatMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "message_id", nullable = false)
     private Long id;
-    private String content;
-    private Date timestamp;
 
     @ManyToOne
-    @JoinColumns({
-            @JoinColumn(name = "sender_id", referencedColumnName = "sender_id"),
-            @JoinColumn(name = "receiver_id", referencedColumnName = "receiver_id")
-    })
-    private ChatRoom chatRoom;
+    @JoinColumn(name = "chat_room_id")
+    ChatRoom chatRoom;
+
+    @ManyToOne
+    @JoinColumn(name = "sender_id")
+    private User sender;
+
+    private String content;
+    private Date timestamp;
 }
