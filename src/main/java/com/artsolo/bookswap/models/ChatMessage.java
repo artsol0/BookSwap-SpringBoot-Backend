@@ -28,6 +28,8 @@ public class ChatMessage {
     @JoinColumn(name = "sender_id")
     private User sender;
 
+    @Column(length = 500)
     private String content;
+
     private Date timestamp;
 }

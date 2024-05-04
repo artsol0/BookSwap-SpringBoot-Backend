@@ -2,6 +2,7 @@ package com.artsolo.bookswap.controllers.chat;
 
 import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
+import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.models.ChatMessage;
 import com.artsolo.bookswap.models.ChatRoom;
 import com.artsolo.bookswap.models.User;
@@ -16,10 +17,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -59,6 +57,12 @@ public class ChatController {
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
                 HttpStatus.FORBIDDEN.value(), "You are not the chat participant to perform this action")).build());
+    }
+
+    @PostMapping("/add/message")
+    public ResponseEntity<?> addNewMessage(@RequestBody MessageRequest messageRequest) {
+        chatMessageService.sendMessage(messageRequest);
+        return ResponseEntity.ok(SuccessResponse.builder().data("Message has been sent").build());
     }
 
 }
