@@ -17,14 +17,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExchangeService {
     private final ExchangeRepository exchangeRepository;
-    private final LibraryService libraryService;
-    private final UserService userService;
+    private final BookService bookService;
 
     public boolean createNewExchange(User initiator, Book book) {
-        Library library = libraryService.getLibraryByBookId(book.getId());
         Exchange exchange = Exchange.builder()
                 .initiator(initiator)
-                .recipient(library.getUser())
+                .recipient(book.getOwner())
                 .book(book)
                 .confirmed(Boolean.FALSE)
                 .build();
@@ -75,13 +73,11 @@ public class ExchangeService {
     }
 
     @Transactional
-    public boolean confirmExchange(Exchange exchange, Library library) {
-        if (libraryService.removeBookFromUserLibrary(library)) {
-            if (libraryService.addNewBookToUserLibrary(exchange.getInitiator(), exchange.getBook())) {
-                exchange.setConfirmed(Boolean.TRUE);
-                exchange = exchangeRepository.save(exchange);
-                return exchange.getConfirmed();
-            }
+    public boolean confirmExchange(Exchange exchange) {
+        if (bookService.changeBookOwner(exchange.getBook(), exchange.getInitiator())) {
+            exchange.setConfirmed(Boolean.TRUE);
+            exchange = exchangeRepository.save(exchange);
+            return exchange.getConfirmed();
         }
         return false;
     }

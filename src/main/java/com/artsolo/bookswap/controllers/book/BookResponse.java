@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class BookResponse {
     private Long id;
+    private Long ownerId;
     private String title;
     private String author;
     private String description;

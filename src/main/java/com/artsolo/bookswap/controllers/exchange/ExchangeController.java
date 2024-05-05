@@ -7,8 +7,6 @@ import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.ExchangeService;
-import com.artsolo.bookswap.services.LibraryService;
-import com.artsolo.bookswap.services.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,15 +20,11 @@ import java.security.Principal;
 @RequestMapping("/api/v1/exchange")
 public class ExchangeController {
     private final ExchangeService exchangeService;
-    private final UserService userService;
     private final BookService bookService;
-    private final LibraryService libraryService;
 
-    public ExchangeController(ExchangeService exchangeService, UserService userService, BookService bookService, LibraryService libraryService) {
+    public ExchangeController(ExchangeService exchangeService, BookService bookService) {
         this.exchangeService = exchangeService;
-        this.userService = userService;
         this.bookService = bookService;
-        this.libraryService = libraryService;
     }
 
     @PostMapping("/create/{bookId}")
@@ -88,9 +82,7 @@ public class ExchangeController {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         if (!exchangeService.exchangeIsConfirmed(exchange)) {
             if (exchangeService.userIsRecipientOfExchange(exchange, user)) {
-                Library library = libraryService.getLibraryById(
-                        new CompositeKey(exchange.getRecipient().getId(), exchange.getBook().getId()));
-                if (exchangeService.confirmExchange(exchange, library)) {
+                if (exchangeService.confirmExchange(exchange)) {
                     return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was confirmed successfully")
                             .build());
                 }

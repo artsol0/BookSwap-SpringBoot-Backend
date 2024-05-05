@@ -126,6 +126,14 @@ public class BookController {
         }
     }
 
+    @GetMapping("/get/by/user")
+    public ResponseEntity<?> getCurrentUserBooks(@RequestParam(defaultValue = "0") int page, Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        Pageable pageable =  PageRequest.of(page, 10);
+        return ResponseEntity.ok().body(SuccessResponse.builder()
+                .data(bookService.getBooksPagedByUser(pageable, user)).build());
+    }
+
     @PostMapping("/get/by/attributes")
     public ResponseEntity<?> getBooksByAttributes(@RequestParam(defaultValue = "0") int page,
                                                   @RequestBody FindByAttributesRequest request) {

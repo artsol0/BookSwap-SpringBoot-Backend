@@ -33,11 +33,15 @@ public class BookService {
     private final QualityService qualityService;
     private final StatusService statusService;
     private final LanguageService languageService;
-    private final LibraryRepository libraryRepository;
-    private final LibraryService libraryService;
+    private final NoteService noteService;
 
     public Book getBookById(Long id) {
         return bookRepository.findById(id).orElseThrow(() -> new NoDataFoundException("Book", id));
+    }
+
+    public Page<BookResponse> getBooksPagedByUser(Pageable pageable, User user) {
+        Page<Book> bookPage = bookRepository.findByOwner(pageable, user);
+        return bookPage.map(this::getBookResponse);
     }
 
     public Page<BookResponse> getAllBooksPaged(Pageable pageable) {
@@ -63,6 +67,7 @@ public class BookService {
     public BookResponse getBookResponse(Book book) {
         return BookResponse.builder()
                         .id(book.getId())
+                        .ownerId(book.getOwner().getId())
                         .title(book.getTitle())
                         .author(book.getAuthor())
                         .description(book.getDescription())
@@ -118,6 +123,7 @@ public class BookService {
         byte[] photo = addBookRequest.getPhoto().getBytes();
 
         Book book = Book.builder()
+                .owner(user)
                 .title(addBookRequest.getTitle())
                 .author(addBookRequest.getAuthor())
                 .description(addBookRequest.getDescription())
@@ -129,12 +135,11 @@ public class BookService {
                 .build();
 
         Book newBook = bookRepository.save(book);
-        return libraryService.addNewBookToUserLibrary(user, newBook);
+        noteService.note(user, newBook);
+        return bookRepository.existsById(newBook.getId());
     }
 
     public boolean deleteBook(Book book) {
-        Library library = libraryRepository.findByBookId(book.getId());
-        libraryRepository.delete(library);
         bookRepository.deleteById(book.getId());
         return !bookRepository.existsById(book.getId());
     }
@@ -160,6 +165,13 @@ public class BookService {
         }
     }
 
+    public boolean changeBookOwner(Book book, User newOwner) {
+        book.setOwner(newOwner);
+        Book svdBook = bookRepository.save(book);
+        noteService.note(newOwner, svdBook);
+        return svdBook.getOwner().getId().equals(newOwner.getId());
+    }
+
     public byte[] getBookPhoto(Book book) {return book.getPhoto();}
 
     public boolean bookRequestIsValid(AddBookRequest request) {
@@ -178,8 +190,7 @@ public class BookService {
     }
 
     public boolean userIsBookOwner(User user, Book book) {
-        return user.getLibrary().stream().map(Library::getBook).anyMatch(libraryBook ->
-                libraryBook.getId().equals(book.getId()));
+        return book.getOwner().getId().equals(user.getId());
     }
 
     public boolean isBookInWishlist(User user, Book book) {
