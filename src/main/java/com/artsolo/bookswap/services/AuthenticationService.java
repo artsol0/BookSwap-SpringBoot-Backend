@@ -40,27 +40,31 @@ public class AuthenticationService {
         this.emailSender = emailSender;
     }
 
-    public boolean register(RegisterRequest request) throws IOException {
-        if (userRepository.findByEmail(request.getEmail()).isEmpty()) {
-            var user = User.builder()
-                    .nickname(request.getNickname())
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .role(Role.READER)
-                    .activity(Boolean.FALSE)
-                    .registrationDate(LocalDate.now())
-                    .points(0)
-                    .photo(Files.readAllBytes(Paths.get("./src/main/resources/static/default-avatar-icon.jpg")))
-                    .country("Unknown")
-                    .city("Unknown")
-                    .build();
-            var savedUser = userRepository.save(user);
-            String jvtToken = jwtService.generateToken(user);
-            saveUserToken(savedUser, jvtToken);
-            emailSender.sendEmailConfirmation(savedUser.getEmail(), savedUser.getNickname(), jvtToken);
-            return true;
-        }
-        return false;
+    public void register(RegisterRequest request) throws IOException {
+        var user = User.builder()
+                .nickname(request.getNickname())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.READER)
+                .activity(Boolean.FALSE)
+                .registrationDate(LocalDate.now())
+                .points(0)
+                .photo(Files.readAllBytes(Paths.get("./src/main/resources/static/default-avatar-icon.jpg")))
+                .country("Unknown")
+                .city("Unknown")
+                .build();
+        var savedUser = userRepository.save(user);
+        String jvtToken = jwtService.generateToken(user);
+        saveUserToken(savedUser, jvtToken);
+        emailSender.sendEmailConfirmation(savedUser.getEmail(), savedUser.getNickname(), jvtToken);
+    }
+
+    public boolean isEmailTaken(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    public boolean isNicknameTaken(String nickname) {
+        return userRepository.findByNickname(nickname).isPresent();
     }
 
     public String confirmEmail(String token) {
