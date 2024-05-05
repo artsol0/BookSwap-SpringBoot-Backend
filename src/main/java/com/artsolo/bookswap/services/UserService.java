@@ -5,6 +5,7 @@ import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.repositoryes.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -75,11 +76,13 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void increaseUserPoints(int number, User user) {
         user.setPoints(user.getPoints() + number);
         userRepository.save(user);
     }
 
+    @Transactional
     public void decreaseUserPoints(int number, User user) {
         user.setPoints(user.getPoints() - number);
         userRepository.save(user);

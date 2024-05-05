@@ -35,7 +35,6 @@ public class BookController {
         this.userService = userService;
     }
 
-    @Transactional
     @PostMapping("/add")
     public ResponseEntity<?> addNewBook(@ModelAttribute AddBookRequest request, Principal currentUser) throws IOException {
         if (bookService.bookRequestIsValid(request)) {
@@ -57,6 +56,7 @@ public class BookController {
         Book book = bookService.getBookById(id);
         if (bookService.userIsBookOwner(user, book) || user.getRole().equals(Role.ADMINISTRATOR)) {
             if (bookService.deleteBook(book)) {
+                userService.decreaseUserPoints(10, user);
                 return ResponseEntity.ok().body(MessageResponse.builder().message("Book was deleted successfully").build());
             }
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(

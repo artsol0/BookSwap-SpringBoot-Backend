@@ -7,6 +7,7 @@ import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.ExchangeService;
+import com.artsolo.bookswap.services.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,12 @@ import java.security.Principal;
 public class ExchangeController {
     private final ExchangeService exchangeService;
     private final BookService bookService;
+    private final UserService userService;
 
-    public ExchangeController(ExchangeService exchangeService, BookService bookService) {
+    public ExchangeController(ExchangeService exchangeService, BookService bookService, UserService userService) {
         this.exchangeService = exchangeService;
         this.bookService = bookService;
+        this.userService = userService;
     }
 
     @PostMapping("/create/{bookId}")
@@ -83,6 +86,8 @@ public class ExchangeController {
         if (!exchangeService.exchangeIsConfirmed(exchange)) {
             if (exchangeService.userIsRecipientOfExchange(exchange, user)) {
                 if (exchangeService.confirmExchange(exchange)) {
+                    userService.decreaseUserPoints(20, exchange.getInitiator());
+                    userService.increaseUserPoints(25, exchange.getRecipient());
                     return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was confirmed successfully")
                             .build());
                 }
