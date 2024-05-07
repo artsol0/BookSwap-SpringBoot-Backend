@@ -56,7 +56,7 @@ public class Book {
     private List<Review> reviews;
     @OneToMany(mappedBy = "book", orphanRemoval = true)
     private List<Wishlist> wishlist;
-    @OneToMany(mappedBy = "book", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "book", orphanRemoval = true)
     private List<Exchange> exchanges;
     @OneToMany(mappedBy = "book", orphanRemoval = true)
     private List<Note> notes;

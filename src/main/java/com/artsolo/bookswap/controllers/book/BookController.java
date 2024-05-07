@@ -10,7 +10,7 @@ import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.UserService;
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -26,14 +26,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/book")
+@RequiredArgsConstructor
 public class BookController {
+
     private final BookService bookService;
     private final UserService userService;
-
-    public BookController(BookService bookService, UserService userService) {
-        this.bookService = bookService;
-        this.userService = userService;
-    }
 
     @PostMapping("/add")
     public ResponseEntity<?> addNewBook(@ModelAttribute AddBookRequest request, Principal currentUser) throws IOException {

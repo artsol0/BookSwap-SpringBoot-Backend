@@ -7,7 +7,6 @@ import com.artsolo.bookswap.models.Book;
 import com.artsolo.bookswap.models.CompositeKey;
 import com.artsolo.bookswap.models.Review;
 import com.artsolo.bookswap.models.User;
-import com.artsolo.bookswap.repositoryes.BookRepository;
 import com.artsolo.bookswap.repositoryes.ReviewRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,19 +15,27 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewService {
     private final ReviewRepository reviewRepository;
 
-    public ReviewService(ReviewRepository reviewRepository, BookRepository bookRepository) {
-        this.reviewRepository = reviewRepository;
-    }
+    public ReviewService(ReviewRepository reviewRepository) {this.reviewRepository = reviewRepository;}
 
     public Review getReviewById(Long userId, Long bookId) {
         CompositeKey compositeKey = new CompositeKey(userId, bookId);
         return reviewRepository.findById(compositeKey)
                 .orElseThrow(() -> new NoDataFoundException("Review", userId, bookId));
+    }
+
+    public List<ReviewResponse> getAllBookReviews(Book book) {
+        return book.getReviews().stream().map(this::getReviewResponse).collect(Collectors.toList());
+    }
+
+    public Page<ReviewResponse> getAllBookReviewsPaged(Long bookId, Pageable pageable) {
+        Page<Review> reviewPage = reviewRepository.findByBookId(bookId, pageable);
+        return reviewPage.map(this::getReviewResponse);
     }
 
     public ReviewResponse getReviewResponse(Review review) {
@@ -66,27 +73,6 @@ public class ReviewService {
     public boolean deleteRevive(Review review) {
         reviewRepository.deleteById(review.getReviewId());
         return !reviewRepository.existsById(review.getReviewId());
-    }
-
-    public List<ReviewResponse> getAllBookReviews(Book book) {
-        List<ReviewResponse> responses = new ArrayList<>();
-        List<Review> reviews = book.getReviews();
-        for (Review review : reviews) {
-            responses.add(ReviewResponse.builder()
-                    .userId(review.getReviewId().getUser_id())
-                    .bookId(review.getReviewId().getBook_id())
-                    .nickname(review.getUser().getNickname())
-                    .userPhoto(review.getUser().getPhoto())
-                    .rating(review.getRating())
-                    .review(review.getReview())
-                    .build());
-        }
-        return responses;
-    }
-
-    public Page<ReviewResponse> getAllBookReviewsPaged(Long bookId, Pageable pageable) {
-        Page<Review> reviewPage = reviewRepository.findByBookId(bookId, pageable);
-        return reviewPage.map(this::getReviewResponse);
     }
 
     public boolean reviewIsExist(Long userId, Long bookId) {

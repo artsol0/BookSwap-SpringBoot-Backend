@@ -11,6 +11,7 @@ import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.ReviewService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,15 +24,11 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/v1/review")
+@RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService reviewService;
     private final BookService bookService;
-
-    public ReviewController(ReviewService reviewService, BookService bookService) {
-        this.reviewService = reviewService;
-        this.bookService = bookService;
-    }
 
     @PostMapping("/{bookId}/add-review")
     public ResponseEntity<?> addBookReview(@PathVariable Long bookId, @RequestBody ReviewRequest request, Principal currentUser) {

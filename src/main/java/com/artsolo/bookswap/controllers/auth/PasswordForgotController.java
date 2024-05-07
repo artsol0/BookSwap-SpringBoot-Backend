@@ -3,6 +3,7 @@ package com.artsolo.bookswap.controllers.auth;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.services.AuthenticationService;
 import com.artsolo.bookswap.services.JwtService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,15 +13,11 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/api/v1/forgot-password")
+@RequiredArgsConstructor
 public class PasswordForgotController {
 
     private final AuthenticationService authenticationService;
     private final JwtService jwtService;
-
-    public PasswordForgotController(AuthenticationService authenticationService, JwtService jwtService) {
-        this.authenticationService = authenticationService;
-        this.jwtService = jwtService;
-    }
 
     @PostMapping
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {

@@ -3,7 +3,6 @@ package com.artsolo.bookswap.controllers.location;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.services.LocationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,11 +13,12 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
 @RequestMapping("/api/v1/location")
 public class LocationController {
 
     private final LocationService locationService;
+
+    public LocationController(LocationService locationService) {this.locationService = locationService;}
 
     @GetMapping("/get/countries")
     public ResponseEntity<?> getCountries() throws URISyntaxException, JsonProcessingException {

@@ -2,6 +2,7 @@ package com.artsolo.bookswap.services;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,14 +15,12 @@ import org.thymeleaf.context.Context;
 import java.nio.charset.StandardCharsets;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService implements EmailSender {
+
     private final static Logger logger = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
-    public EmailService(JavaMailSender javaMailSender, TemplateEngine templateEngine) {
-        this.javaMailSender = javaMailSender;
-        this.templateEngine = templateEngine;
-    }
 
     @Override
     @Async
@@ -65,6 +64,7 @@ public class EmailService implements EmailSender {
     }
 
     @Override
+    @Async
     public void sendResetPasswordConfirmation(String to, String name, String jwtToken) {
         try {
             Context context = new Context();

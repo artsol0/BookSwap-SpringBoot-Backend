@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +28,8 @@ import static org.springframework.data.jpa.domain.Specification.where;
 @RequiredArgsConstructor
 public class BookService {
     private final BookRepository bookRepository;
+    private final WishlistRepository wishlistRepository;
+    private final ExchangeRepository exchangeRepository;
     private final GenreService genreService;
     private final QualityService qualityService;
     private final StatusService statusService;
@@ -81,38 +82,22 @@ public class BookService {
 
     public List<BookResponse> getBooksByGenreId(Long id) {
         List<Book> books = bookRepository.findAllByGenreId(id);
-        List<BookResponse> bookResponses = new ArrayList<>();
-        for (Book book : books) {
-            bookResponses.add(getBookResponse(book));
-        }
-        return bookResponses;
+        return books.stream().map(this::getBookResponse).collect(Collectors.toList());
     }
 
     public List<BookResponse> getBooksByLanguageId(Long id) {
         List<Book> books = bookRepository.findAllByLanguageId(id);
-        List<BookResponse> bookResponses = new ArrayList<>();
-        for (Book book : books) {
-            bookResponses.add(getBookResponse(book));
-        }
-        return bookResponses;
+        return books.stream().map(this::getBookResponse).collect(Collectors.toList());
     }
 
     public List<BookResponse> getBooksByTitleOrAuthor(String keyword) {
         List<Book> books = bookRepository.findAllByTitleOrAuthorContaining(keyword);
-        List<BookResponse> bookResponses = new ArrayList<>();
-        for (Book book : books) {
-            bookResponses.add(getBookResponse(book));
-        }
-        return bookResponses;
+        return books.stream().map(this::getBookResponse).collect(Collectors.toList());
     }
 
     public List<BookResponse> getBooksByGenreIdAndLanguageId(Long genreId, Long languageId) {
         List<Book> books = bookRepository.findAllByGenreIdAndLanguageId(genreId, languageId);
-        List<BookResponse> bookResponses = new ArrayList<>();
-        for (Book book : books) {
-            bookResponses.add(getBookResponse(book));
-        }
-        return bookResponses;
+        return books.stream().map(this::getBookResponse).collect(Collectors.toList());
     }
 
     public boolean addNewBook(AddBookRequest addBookRequest, User user) throws IOException, NoDataFoundException {
@@ -194,12 +179,11 @@ public class BookService {
     }
 
     public boolean isBookInWishlist(User user, Book book) {
-        return user.getWishlist().stream().map(Wishlist::getBook).anyMatch(wishlistBook ->
-                wishlistBook.getId().equals(book.getId()));
+        return wishlistRepository.existsById(new CompositeKey(user.getId(), book.getId()));
     }
 
     public boolean isBookInExchange(User user, Book book) {
-        return user.getInitiations().stream().map(Exchange::getBook).anyMatch(exchangedBook ->
-                exchangedBook.getId().equals(book.getId()));
+        return exchangeRepository.findAllByInitiatorId(user.getId()).stream()
+                .map(Exchange::getBook).anyMatch(exchangeBook -> exchangeBook.getId().equals(book.getId()));
     }
 }

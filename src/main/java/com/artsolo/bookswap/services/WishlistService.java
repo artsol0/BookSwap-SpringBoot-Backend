@@ -2,13 +2,11 @@ package com.artsolo.bookswap.services;
 
 import com.artsolo.bookswap.controllers.book.BookResponse;
 import com.artsolo.bookswap.models.*;
-import com.artsolo.bookswap.repositoryes.BookRepository;
 import com.artsolo.bookswap.repositoryes.WishlistRepository;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,9 +15,7 @@ public class WishlistService {
 
     private final WishlistRepository wishlistRepository;
 
-    public WishlistService(WishlistRepository wishlistRepository, BookRepository bookRepository) {
-        this.wishlistRepository = wishlistRepository;
-    }
+    public WishlistService(WishlistRepository wishlistRepository) {this.wishlistRepository = wishlistRepository;}
 
     public boolean addBookToWishlist(Book book, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
@@ -39,20 +35,20 @@ public class WishlistService {
     public List<BookResponse> getAllWishlistBooks(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         List<Wishlist> wishlists = wishlistRepository.findByUserId(user.getId());
-        List<BookResponse> getBookResponses = new ArrayList<>();
-        for (Wishlist wishlist : wishlists) {
-            getBookResponses.add(BookResponse.builder()
-                            .id(wishlist.getBook().getId())
-                            .title(wishlist.getBook().getTitle())
-                            .author(wishlist.getBook().getAuthor())
-                            .description(wishlist.getBook().getDescription())
-                            .genres(wishlist.getBook().getGenres().stream().map(Genre::getGenre).collect(Collectors.toList()))
-                            .quality(wishlist.getBook().getQuality().getQuality())
-                            .status(wishlist.getBook().getStatus().getStatus())
-                            .language(wishlist.getBook().getLanguage().getLanguage())
-                            .photo(wishlist.getBook().getPhoto())
-                            .build());
-        }
-        return getBookResponses;
+        return wishlists.stream().map(this::getBookResponse).collect(Collectors.toList());
+    }
+
+    public BookResponse getBookResponse(Wishlist wishlist) {
+        return BookResponse.builder()
+                .id(wishlist.getBook().getId())
+                .title(wishlist.getBook().getTitle())
+                .author(wishlist.getBook().getAuthor())
+                .description(wishlist.getBook().getDescription())
+                .genres(wishlist.getBook().getGenres().stream().map(Genre::getGenre).collect(Collectors.toList()))
+                .quality(wishlist.getBook().getQuality().getQuality())
+                .status(wishlist.getBook().getStatus().getStatus())
+                .language(wishlist.getBook().getLanguage().getLanguage())
+                .photo(wishlist.getBook().getPhoto())
+                .build();
     }
 }

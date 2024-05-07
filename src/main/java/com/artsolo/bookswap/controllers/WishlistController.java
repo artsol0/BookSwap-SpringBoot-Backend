@@ -6,6 +6,7 @@ import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.WishlistService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,14 +15,11 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/v1/wishlist")
+@RequiredArgsConstructor
 public class WishlistController {
+
     private final WishlistService wishlistService;
     private final BookService bookService;
-
-    public WishlistController(WishlistService wishlistService, BookService bookService) {
-        this.wishlistService = wishlistService;
-        this.bookService = bookService;
-    }
 
     @PostMapping("/add-book/{id}")
     public ResponseEntity<?> addBookToWishlist(@PathVariable Long id, Principal currentUser) {

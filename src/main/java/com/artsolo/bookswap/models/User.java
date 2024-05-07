@@ -43,11 +43,11 @@ public class User implements UserDetails {
     private List<Token> tokens;
     @OneToMany(mappedBy = "owner", orphanRemoval = true)
     private List<Book> books;
-    @OneToMany(mappedBy = "user", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
     private List<Wishlist> wishlist;
     @OneToMany(mappedBy = "user", orphanRemoval = true)
     private List<Review> reviews;
-    @OneToMany(mappedBy = "initiator", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "initiator", orphanRemoval = true)
     private List<Exchange> initiations;
     @OneToMany(mappedBy = "recipient", orphanRemoval = true)
     private List<Exchange> recipients;

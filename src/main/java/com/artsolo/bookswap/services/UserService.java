@@ -6,6 +6,7 @@ import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.repositoryes.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,14 +19,10 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow(() -> new NoDataFoundException("User", id));

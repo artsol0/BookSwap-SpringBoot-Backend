@@ -6,16 +6,15 @@ import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.ExchangeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ExchangeService {
+
     private final ExchangeRepository exchangeRepository;
     private final BookService bookService;
 
@@ -47,24 +46,14 @@ public class ExchangeService {
                 .build();
     }
 
-    public List<ExchangeResponse> getAllUserInitiateExchanges(Principal currentUser) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        List<ExchangeResponse> exchangeResponses = new ArrayList<>();
+    public List<ExchangeResponse> getAllUserInitiateExchanges(User user) {
         List<Exchange> exchanges = exchangeRepository.findAllByInitiatorId(user.getId());
-        for (Exchange exchange : exchanges) {
-            exchangeResponses.add(getExchangeResponse(exchange));
-        }
-        return exchangeResponses;
+        return exchanges.stream().map(this::getExchangeResponse).collect(Collectors.toList());
     }
 
-    public List<ExchangeResponse> getAllUserRecipientExchanges(Principal currentUser) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        List<ExchangeResponse> exchangeResponses = new ArrayList<>();
+    public List<ExchangeResponse> getAllUserRecipientExchanges(User user) {
         List<Exchange> exchanges = exchangeRepository.findAllByRecipientId(user.getId());
-        for (Exchange exchange : exchanges) {
-            exchangeResponses.add(getExchangeResponse(exchange));
-        }
-        return exchangeResponses;
+        return exchanges.stream().map(this::getExchangeResponse).collect(Collectors.toList());
     }
 
     public boolean deleteExchange(Exchange exchange) {

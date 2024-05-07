@@ -8,6 +8,7 @@ import com.artsolo.bookswap.models.Token;
 import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.repositoryes.TokenRepository;
 import com.artsolo.bookswap.repositoryes.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class AuthenticationService {
 
     private final UserRepository userRepository;
@@ -30,15 +32,6 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailSender emailSender;
-
-    public AuthenticationService(UserRepository userRepository, TokenRepository tokenRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager, EmailSender emailSender) {
-        this.userRepository = userRepository;
-        this.tokenRepository = tokenRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
-        this.emailSender = emailSender;
-    }
 
     public void register(RegisterRequest request) throws IOException {
         var user = User.builder()

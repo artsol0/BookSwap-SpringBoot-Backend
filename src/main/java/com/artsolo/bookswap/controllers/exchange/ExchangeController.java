@@ -8,6 +8,7 @@ import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.ExchangeService;
 import com.artsolo.bookswap.services.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,17 +19,13 @@ import java.security.Principal;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/exchange")
 public class ExchangeController {
+
     private final ExchangeService exchangeService;
     private final BookService bookService;
     private final UserService userService;
-
-    public ExchangeController(ExchangeService exchangeService, BookService bookService, UserService userService) {
-        this.exchangeService = exchangeService;
-        this.bookService = bookService;
-        this.userService = userService;
-    }
 
     @PostMapping("/create/{bookId}")
     public ResponseEntity<?> createNewExchange(@PathVariable Long bookId, Principal currentUser) {
@@ -69,14 +66,16 @@ public class ExchangeController {
 
     @GetMapping("/get/initiation")
     public ResponseEntity<?> getAllInitiateExchanges(Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(exchangeService.getAllUserInitiateExchanges(currentUser)).build());
+                .data(exchangeService.getAllUserInitiateExchanges(user)).build());
     }
 
     @GetMapping("/get/recipient")
     public ResponseEntity<?> getAllRecipientExchanges(Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(exchangeService.getAllUserRecipientExchanges(currentUser)).build());
+                .data(exchangeService.getAllUserRecipientExchanges(user)).build());
     }
 
     @PutMapping("/confirm/{id}")

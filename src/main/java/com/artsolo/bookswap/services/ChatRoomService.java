@@ -5,6 +5,7 @@ import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.ChatRoom;
 import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.repositoryes.ChatRoomRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,15 +13,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final UserService userService;
-
-    public ChatRoomService(ChatRoomRepository chatRoomRepository, UserService userService) {
-        this.chatRoomRepository = chatRoomRepository;
-        this.userService = userService;
-    }
 
     public List<ChatRoomResponse> getChatRooms(Long userId) {
         List<ChatRoom> chatRooms = chatRoomRepository.findAllByParticipantId(userId);
