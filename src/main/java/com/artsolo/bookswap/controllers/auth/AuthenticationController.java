@@ -5,6 +5,7 @@ import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
 import com.artsolo.bookswap.services.AuthenticationService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +23,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) throws IOException {
-        if (request.getNickname() != null && request.getEmail() != null && request.getPassword() != null) {
-            if (!authenticationService.isEmailTaken(request.getEmail())) {
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) throws IOException {
+        if (!authenticationService.isEmailTaken(request.getEmail())) {
                 if (!authenticationService.isNicknameTaken(request.getNickname())) {
                     authenticationService.register(request);
                     return ResponseEntity.ok().body(MessageResponse.builder()
@@ -34,11 +34,8 @@ public class AuthenticationController {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder().error(new ErrorDescription(
                         HttpStatus.CONFLICT.value(), "Nickname is already taken")).build());
             }
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder().error(new ErrorDescription(
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder().error(new ErrorDescription(
                     HttpStatus.CONFLICT.value(), "Email address is already taken")).build());
-        }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
     }
 
     @GetMapping("/confirm")
@@ -47,16 +44,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
-        if (request.getEmail() != null && request.getPassword() != null) {
-            AuthenticationResponse authenticationResponse = authenticationService.authenticate(request);
-            if (authenticationResponse.getToken() != null && !authenticationResponse.getToken().isEmpty()) {
-                return ResponseEntity.ok().body(SuccessResponse.builder().data(authenticationResponse).build());
-            }
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Invalid data credentials")).build());
+    public ResponseEntity<?> authenticate(@RequestBody @Valid AuthenticationRequest request) {
+        AuthenticationResponse authenticationResponse = authenticationService.authenticate(request);
+        if (authenticationResponse.getToken() != null && !authenticationResponse.getToken().isEmpty()) {
+            return ResponseEntity.ok().body(SuccessResponse.builder().data(authenticationResponse).build());
         }
         return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
+                HttpStatus.BAD_REQUEST.value(), "Invalid data credentials")).build());
     }
 }

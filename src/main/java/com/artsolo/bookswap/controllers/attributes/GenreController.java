@@ -9,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/v1/genre")
 public class GenreController {
@@ -21,16 +19,12 @@ public class GenreController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addNewGenre(@RequestBody Map<String, String> request) {
-        if (request.get("genre") != null) {
-            if (genreService.addNewGenre(request.get("genre"))) {
-                return ResponseEntity.ok().body(MessageResponse.builder().message("Genre was added successfully").build());
-            }
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Filed to add new genre")).build());
+    public ResponseEntity<?> addNewGenre(@RequestParam("genre") String genre) {
+        if (genreService.addNewGenre(genre)) {
+            return ResponseEntity.ok().body(MessageResponse.builder().message("Genre was added successfully").build());
         }
         return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
+                    HttpStatus.BAD_REQUEST.value(), "Filed to add new genre")).build());
     }
 
     @DeleteMapping("/delete/{id}")

@@ -3,6 +3,7 @@ package com.artsolo.bookswap.controllers.auth;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.services.AuthenticationService;
 import com.artsolo.bookswap.services.JwtService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -34,8 +35,8 @@ public class PasswordForgotController {
     }
 
     @PostMapping("/reset-password")
-    public String updatePassword(@RequestParam("token") String token, @RequestParam("password") String newPassword) {
-        if (authenticationService.resetPassword(token, newPassword)) {
+    public String updatePassword(@RequestParam("token") String token, @Valid ResetPasswordRequest request) {
+        if (authenticationService.resetPassword(token, request.getNewPassword())) {
             return "password-reset";
         }
         return "password-not-reset";

@@ -10,6 +10,7 @@ import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,18 +34,14 @@ public class BookController {
     private final UserService userService;
 
     @PostMapping("/add")
-    public ResponseEntity<?> addNewBook(@ModelAttribute AddBookRequest request, Principal currentUser) throws IOException {
-        if (bookService.bookRequestIsValid(request)) {
-            User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-            if (bookService.addNewBook(request, user)) {
-                userService.increaseUserPoints(10, user);
-                return ResponseEntity.ok().body(MessageResponse.builder().message("Book was added successfully").build());
-            }
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Filed to add new book")).build());
+    public ResponseEntity<?> addNewBook(@ModelAttribute @Valid AddBookRequest request, Principal currentUser) throws IOException {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        if (bookService.addNewBook(request, user)) {
+            userService.increaseUserPoints(10, user);
+            return ResponseEntity.ok().body(MessageResponse.builder().message("Book was added successfully").build());
         }
         return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
+                HttpStatus.BAD_REQUEST.value(), "Filed to add new book")).build());
     }
 
     @DeleteMapping("/delete/{id}")
@@ -64,7 +61,7 @@ public class BookController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateBookById(@PathVariable Long id, @ModelAttribute UpdateBookRequest request, Principal currentUser) throws IOException {
+    public ResponseEntity<?> updateBookById(@PathVariable Long id, @ModelAttribute @Valid UpdateBookRequest request, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Book book = bookService.getBookById(id);
         if (bookService.userIsBookOwner(user, book) || (user.getRole().equals(Role.ADMINISTRATOR) || user.getRole().equals(Role.MODERATOR))) {
@@ -133,7 +130,7 @@ public class BookController {
 
     @PostMapping("/get/by/attributes")
     public ResponseEntity<?> getBooksByAttributes(@RequestParam(defaultValue = "0") int page,
-                                                  @RequestBody FindByAttributesRequest request) {
+                                                  @RequestBody @Valid FindByAttributesRequest request) {
         Pageable pageable =  PageRequest.of(page, 10);
         return ResponseEntity.ok().body(SuccessResponse.builder()
                 .data(bookService.getAllBooksPagedByAttributes(pageable, request)).build());

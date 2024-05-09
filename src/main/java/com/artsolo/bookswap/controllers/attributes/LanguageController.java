@@ -9,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/v1/language")
 public class LanguageController {
@@ -21,16 +19,12 @@ public class LanguageController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addNewLanguage(@RequestBody Map<String, String> request) {
-        if (request.get("language") != null) {
-            if (languageService.addNewLanguage(request.get("language"))) {
-                return ResponseEntity.ok().body(MessageResponse.builder().message("Language was added successfully").build());
-            }
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Filed to add new language")).build());
+    public ResponseEntity<?> addNewLanguage(@RequestParam("language") String language) {
+        if (languageService.addNewLanguage(language)) {
+            return ResponseEntity.ok().body(MessageResponse.builder().message("Language was added successfully").build());
         }
         return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
+                HttpStatus.BAD_REQUEST.value(), "Filed to add new language")).build());
     }
 
     @DeleteMapping("/delete/{id}")

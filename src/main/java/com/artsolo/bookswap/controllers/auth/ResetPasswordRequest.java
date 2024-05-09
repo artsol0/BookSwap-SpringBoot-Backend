@@ -1,28 +1,17 @@
 package com.artsolo.bookswap.controllers.auth;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class RegisterRequest {
-
-    @NotBlank(message = "Nickname is mandatory")
-    @NotNull(message = "Nickname can't be null")
-    @Size(max = 35, message = "Nickname cannot contain more than 35 characters")
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Nickname cannot contain special characters")
-    private String nickname;
-
-    @NotBlank(message = "Email is mandatory")
-    @NotNull(message = "Email can't be null")
-    @Email(message = "Email address must be valid")
-    private String email;
-
+public class ResetPasswordRequest {
     @NotBlank(message = "Password is mandatory")
     @NotNull(message = "Password can't be null")
     @Size(min = 8, message = "Password must be at least 8 characters long")
@@ -32,6 +21,5 @@ public class RegisterRequest {
             @Pattern(regexp = "(?=.*\\d).+", message = "Password must contain at least one digit"),
             @Pattern(regexp = "(?=.*[!@#$%^&*]).+", message = "Password must contain at least one special character")
     })
-    private String password;
-
+    private String newPassword;
 }

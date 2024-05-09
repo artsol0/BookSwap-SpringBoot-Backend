@@ -9,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/v1/quality")
 public class QualityController {
@@ -21,16 +19,12 @@ public class QualityController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addNewQuality(@RequestBody Map<String, String> request) {
-        if (request.get("quality") != null) {
-            if (qualityService.addNewQuality(request.get("quality"))) {
-                return ResponseEntity.ok().body(MessageResponse.builder().message("Quality was added successfully").build());
-            }
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Filed to add new quality")).build());
+    public ResponseEntity<?> addNewQuality(@RequestParam("quality") String quality) {
+        if (qualityService.addNewQuality(quality)) {
+            return ResponseEntity.ok().body(MessageResponse.builder().message("Quality was added successfully").build());
         }
         return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
+                HttpStatus.BAD_REQUEST.value(), "Filed to add new quality")).build());
     }
 
     @DeleteMapping("/delete/{id}")

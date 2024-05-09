@@ -24,7 +24,9 @@ public class Book {
     @JoinColumn(name = "owner_id")
     private User owner;
 
+    @Column(length = 50)
     private String title;
+    @Column(length = 50)
     private String author;
     @Column(length = 1000)
     private String description;

@@ -11,6 +11,7 @@ import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.models.enums.Role;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.ReviewService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,16 +32,12 @@ public class ReviewController {
     private final BookService bookService;
 
     @PostMapping("/{bookId}/add-review")
-    public ResponseEntity<?> addBookReview(@PathVariable Long bookId, @RequestBody ReviewRequest request, Principal currentUser) {
-        if (request.getReview() != null && request.getRating() != null) {
-            if (reviewService.addBookRevive(bookService.getBookById(bookId), request, currentUser)){
-                return ResponseEntity.ok().body(new MessageResponse("Review was added successfully"));
-            }
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Failed to add review")).build());
+    public ResponseEntity<?> addBookReview(@PathVariable Long bookId, @RequestBody @Valid ReviewRequest request, Principal currentUser) {
+        if (reviewService.addBookRevive(bookService.getBookById(bookId), request, currentUser)){
+            return ResponseEntity.ok().body(new MessageResponse("Review was added successfully"));
         }
         return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
+                HttpStatus.BAD_REQUEST.value(), "Failed to add review")).build());
     }
 
     @GetMapping("/{bookId}/get-reviews")
@@ -71,7 +68,7 @@ public class ReviewController {
 
     @PutMapping("/update/{userId}/{bookId}")
     public ResponseEntity<?> updateReviewById(@PathVariable Long userId, @PathVariable Long bookId,
-                                              @RequestBody ReviewRequest request, Principal currentUser) {
+                                              @RequestBody @Valid ReviewRequest request, Principal currentUser) {
         if (request.getReview() != null && request.getRating() != null) {
             User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
             Review review = reviewService.getReviewById(userId, bookId);

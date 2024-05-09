@@ -9,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/v1/status")
 public class StatusController {
@@ -21,16 +19,12 @@ public class StatusController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addNewStatus(@RequestBody Map<String, String> request) {
-        if (request.get("status") != null) {
-            if (statusService.addNewStatus(request.get("status"))) {
-                return ResponseEntity.ok().body(MessageResponse.builder().message("Status was added successfully").build());
-            }
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Filed to add new status")).build());
+    public ResponseEntity<?> addNewStatus(@RequestParam("status") String status) {
+        if (statusService.addNewStatus(status)) {
+            return ResponseEntity.ok().body(MessageResponse.builder().message("Status was added successfully").build());
         }
         return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
+                HttpStatus.BAD_REQUEST.value(), "Filed to add new status")).build());
     }
 
     @DeleteMapping("/delete/{id}")

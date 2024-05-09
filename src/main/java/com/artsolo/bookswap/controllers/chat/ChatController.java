@@ -9,6 +9,7 @@ import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.services.ChatMessageService;
 import com.artsolo.bookswap.services.ChatRoomService;
 import com.artsolo.bookswap.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class ChatController {
     private final UserService userService;
 
     @MessageMapping("/chat")
-    public void sendMessage(@Payload MessageRequest messageRequest) {
+    public void sendMessage(@Payload @Valid MessageRequest messageRequest) {
         ChatMessage savedMsg = chatMessageService.sendMessage(messageRequest);
         simpMessagingTemplate.convertAndSendToUser(
                 userService.getUserById(messageRequest.getReceiver_id()).getNickname(),
@@ -60,7 +61,7 @@ public class ChatController {
     }
 
     @PostMapping("/add/message")
-    public ResponseEntity<?> addNewMessage(@RequestBody MessageRequest messageRequest) {
+    public ResponseEntity<?> addNewMessage(@RequestBody @Valid MessageRequest messageRequest) {
         ChatMessage savedMsg = chatMessageService.sendMessage(messageRequest);
         simpMessagingTemplate.convertAndSendToUser(
                 userService.getUserById(messageRequest.getReceiver_id()).getNickname(),

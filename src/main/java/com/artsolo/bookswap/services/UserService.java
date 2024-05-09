@@ -1,5 +1,7 @@
 package com.artsolo.bookswap.services;
 
+import com.artsolo.bookswap.controllers.user.LocationChangeRequest;
+import com.artsolo.bookswap.controllers.user.PasswordChangeRequest;
 import com.artsolo.bookswap.controllers.user.UserResponse;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.User;
@@ -15,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -66,10 +67,10 @@ public class UserService {
         }
     }
 
-    public void changeUserLocation(Map<String, String> request, Principal currentUser) {
+    public void changeUserLocation(LocationChangeRequest request, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        user.setCountry(request.get("country"));
-        user.setCity(request.get("city"));
+        user.setCountry(request.getCountry());
+        user.setCity(request.getCity());
         userRepository.save(user);
     }
 
@@ -85,11 +86,11 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public String changeUserPassword(Map<String, String> request, Principal currentUser) {
+    public String changeUserPassword(PasswordChangeRequest request, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        if(passwordEncoder.matches(request.get("current_password"), user.getPassword())) {
-            if (!passwordEncoder.matches(request.get("new_password"), user.getPassword())) {
-                user.setPassword(passwordEncoder.encode(request.get("new_password")));
+        if(passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            if (!passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
                 userRepository.save(user);
                 return "Password changed successfully";
             }

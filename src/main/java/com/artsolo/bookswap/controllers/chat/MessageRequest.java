@@ -1,5 +1,8 @@
 package com.artsolo.bookswap.controllers.chat;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,8 +15,19 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 public class MessageRequest {
+
+    @NotBlank(message = "Content is mandatory")
+    @NotNull(message = "Content can't be null")
+    @Size(max = 500, message = "Content cannot contain more than 500 characters")
     private String content;
+
+    @NotNull(message = "Date can't be null")
     private Date timestamp;
+
+    @NotNull(message = "Sender can't be null")
     private Long sender_id;
+
+    @NotNull(message = "Receiver can't be null")
     private Long receiver_id;
+
 }
