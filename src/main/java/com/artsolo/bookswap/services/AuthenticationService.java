@@ -96,22 +96,22 @@ public class AuthenticationService {
                 .build();
     }
 
-    public String forgotPassword(Map<String, String> request) {
-        User user = userRepository.findByEmail(request.get("email")).orElse(null);
+    public String forgotPassword(String email) {
+        User user = userRepository.findByEmail(email).orElse(null);
         if (user != null) {
             String jvtToken = jwtService.generateToken(user);
             saveUserToken(user, jvtToken);
             emailSender.sendResetPasswordConfirmation(user.getEmail(), user.getNickname(), jvtToken);
             return "A password reset link has been sent to your email address";
         }
-        return "There are no registered users with the email address " + request.get("email");
+        return "There are no registered users with the email address " + email;
     }
 
     public boolean resetPassword(String token, String newPassword) {
         User user = userRepository.findByEmail(jwtService.extractEmail(token)).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-        return true;
+        user = userRepository.save(user);
+        return passwordEncoder.matches(newPassword, user.getPassword());
     }
 
     private void revokeAllUserTokens(User user) {

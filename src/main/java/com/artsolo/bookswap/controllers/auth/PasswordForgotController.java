@@ -6,13 +6,9 @@ import com.artsolo.bookswap.services.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
-@Controller
+@RestController
 @RequestMapping("/api/v1/forgot-password")
 @RequiredArgsConstructor
 public class PasswordForgotController {
@@ -21,24 +17,17 @@ public class PasswordForgotController {
     private final JwtService jwtService;
 
     @PostMapping
-    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
-        return ResponseEntity.ok().body(MessageResponse.builder().message(authenticationService.forgotPassword(request)).build());
+    public ResponseEntity<MessageResponse> forgotPassword(@RequestParam("email") String email) {
+        return ResponseEntity.ok().body(MessageResponse.builder().message(authenticationService.forgotPassword(email)).build());
     }
 
-    @GetMapping("/reset-password")
-    public String resetPassword(@RequestParam("token") String token, Model model) {
-        if (!jwtService.isTokenExpired(token)) {
-            model.addAttribute("token", token);
-            return "reset-password-form";
-        }
-        return "Token has been expired";
+    @GetMapping("/check-token")
+    public boolean resetPassword(@RequestParam("token") String token) {
+        return jwtService.isTokenExpired(token);
     }
 
-    @PostMapping("/reset-password")
-    public String updatePassword(@RequestParam("token") String token, @Valid ResetPasswordRequest request) {
-        if (authenticationService.resetPassword(token, request.getNewPassword())) {
-            return "password-reset";
-        }
-        return "password-not-reset";
+    @PutMapping("/reset-password")
+    public boolean updatePassword(@RequestParam("token") String token, @RequestBody @Valid ResetPasswordRequest request) {
+        return authenticationService.resetPassword(token, request.getNewPassword());
     }
 }

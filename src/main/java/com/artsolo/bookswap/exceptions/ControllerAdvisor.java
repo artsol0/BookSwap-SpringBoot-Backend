@@ -3,6 +3,7 @@ package com.artsolo.bookswap.exceptions;
 import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.ValidatingErrors;
+import io.jsonwebtoken.MalformedJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,6 +47,12 @@ public class ControllerAdvisor {
         ex.getBindingResult().getAllErrors().forEach((error) ->
             errors.add(new ErrorDescription(HttpStatus.BAD_REQUEST.value(), error.getDefaultMessage())));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ValidatingErrors.builder().errors(errors).build());
+    }
+
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity<ErrorResponse> handleMalformedJwtException(MalformedJwtException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.BAD_REQUEST.value(), "Provided invalid token")).build());
     }
 
     @ExceptionHandler(Exception.class)
