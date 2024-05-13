@@ -4,10 +4,13 @@ import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
+import com.artsolo.bookswap.models.Language;
 import com.artsolo.bookswap.services.LanguageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/language")
@@ -19,12 +22,8 @@ public class LanguageController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addNewLanguage(@RequestParam("language") String language) {
-        if (languageService.addNewLanguage(language)) {
-            return ResponseEntity.ok().body(MessageResponse.builder().message("Language was added successfully").build());
-        }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Filed to add new language")).build());
+    public ResponseEntity<SuccessResponse<Language>> addNewLanguage(@RequestParam("language") String language) {
+        return ResponseEntity.ok().body(new SuccessResponse<>(languageService.addNewLanguage(language)));
     }
 
     @DeleteMapping("/delete/{id}")
@@ -37,13 +36,13 @@ public class LanguageController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getLanguageById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(languageService.getLanguageById(id)).build());
+    public ResponseEntity<SuccessResponse<Language>> getLanguageById(@PathVariable Long id) {
+        return ResponseEntity.ok().body(new SuccessResponse<>(languageService.getLanguageById(id)));
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<?> getAllLanguages() {
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(languageService.getAllLanguages()).build());
+    public ResponseEntity<SuccessResponse<List<Language>>> getAllLanguages() {
+        return ResponseEntity.ok().body(new SuccessResponse<>(languageService.getAllLanguages()));
     }
 
 }

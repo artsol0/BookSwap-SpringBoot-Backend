@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/v1/notes")
@@ -22,8 +24,7 @@ public class NoteController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getAllNotesByBookId(@PathVariable Long id) {
-        return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(noteService.getNotesByBook(bookService.getBookById(id))).build());
+    public ResponseEntity<SuccessResponse<List<NoteResponse>>> getAllNotesByBookId(@PathVariable Long id) {
+        return ResponseEntity.ok().body(new SuccessResponse<>(noteService.getNotesByBook(bookService.getBookById(id))));
     }
 }

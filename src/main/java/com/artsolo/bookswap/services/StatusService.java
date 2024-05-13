@@ -15,11 +15,9 @@ public class StatusService {
         this.statusRepository = statusRepository;
     }
 
-    public boolean addNewStatus(String status) {
-        Status newStatus = new Status();
-        newStatus.setStatus(status);
-        newStatus = statusRepository.save(newStatus);
-        return statusRepository.existsById(newStatus.getId());
+    public Status addNewStatus(String status) {
+        Status newStatus = Status.builder().status(status).build();
+        return statusRepository.save(newStatus);
     }
 
     public boolean deleteStatus(Status status) {

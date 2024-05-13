@@ -61,14 +61,14 @@ public class ChatController {
     }
 
     @PostMapping("/add/message")
-    public ResponseEntity<?> addNewMessage(@RequestBody @Valid MessageRequest messageRequest) {
+    public ResponseEntity<SuccessResponse<String>> addNewMessage(@RequestBody @Valid MessageRequest messageRequest) {
         ChatMessage savedMsg = chatMessageService.sendMessage(messageRequest);
         simpMessagingTemplate.convertAndSendToUser(
                 userService.getUserById(messageRequest.getReceiver_id()).getNickname(),
                 "/queue/messages",
                 chatMessageService.getMessageResponse(savedMsg)
         );
-        return ResponseEntity.ok(SuccessResponse.builder().data("Message has been sent").build());
+        return ResponseEntity.ok(new SuccessResponse<>("Message has been sent"));
     }
 
 }

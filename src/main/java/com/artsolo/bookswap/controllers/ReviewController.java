@@ -22,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/review")
@@ -32,7 +33,9 @@ public class ReviewController {
     private final BookService bookService;
 
     @PostMapping("/{bookId}/add-review")
-    public ResponseEntity<?> addBookReview(@PathVariable Long bookId, @RequestBody @Valid ReviewRequest request, Principal currentUser) {
+    public ResponseEntity<?> addBookReview(@PathVariable Long bookId, @RequestBody @Valid ReviewRequest request,
+                                           Principal currentUser)
+    {
         if (reviewService.addBookRevive(bookService.getBookById(bookId), request, currentUser)){
             return ResponseEntity.ok().body(new MessageResponse("Review was added successfully"));
         }
@@ -41,29 +44,29 @@ public class ReviewController {
     }
 
     @GetMapping("/{bookId}/get-reviews")
-    public ResponseEntity<?> getAllBookReviews(@PathVariable Long bookId) {
-        return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(reviewService.getAllBookReviews(bookService.getBookById(bookId))).build());
+    public ResponseEntity<SuccessResponse<List<ReviewResponse>>> getAllBookReviews(@PathVariable Long bookId) {
+        return ResponseEntity.ok().body(new SuccessResponse<>(reviewService.getAllBookReviews(bookService.getBookById(bookId))));
     }
 
     @GetMapping("/{bookId}/get-reviews-page")
-    public ResponseEntity<?> getAllBookReviewsPage(@PathVariable Long bookId, @RequestParam(defaultValue = "0") int page) {
+    public ResponseEntity<SuccessResponse<Page<ReviewResponse>>> getAllBookReviewsPage(
+            @PathVariable Long bookId,
+            @RequestParam(defaultValue = "0") int page)
+    {
         Pageable pageable = PageRequest.of(page, 5);
         Page<ReviewResponse> reviewResponsePage = reviewService.getAllBookReviewsPaged(bookId, pageable);
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(reviewResponsePage).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(reviewResponsePage));
     }
 
     @GetMapping("/get/{userId}/{bookId}")
-    public ResponseEntity<?> getReviewById(@PathVariable Long userId, @PathVariable Long bookId) {
+    public ResponseEntity<SuccessResponse<ReviewResponse>> getReviewById(@PathVariable Long userId, @PathVariable Long bookId) {
         Review review = reviewService.getReviewById(userId, bookId);
-        return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(reviewService.getReviewResponse(review)).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(reviewService.getReviewResponse(review)));
     }
 
     @GetMapping("/exist/{userId}/{bookId}")
-    public ResponseEntity<?> getReviewExistence(@PathVariable Long userId, @PathVariable Long bookId) {
-        return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(reviewService.reviewIsExist(userId, bookId)).build());
+    public ResponseEntity<SuccessResponse<Boolean>> getReviewExistence(@PathVariable Long userId, @PathVariable Long bookId) {
+        return ResponseEntity.ok().body(new SuccessResponse<>(reviewService.reviewIsExist(userId, bookId)));
     }
 
     @PutMapping("/update/{userId}/{bookId}")

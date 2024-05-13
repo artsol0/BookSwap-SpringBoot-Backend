@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GetNoteResponse {
+public class NoteResponse {
     private Long id;
     private String country;
     private String city;

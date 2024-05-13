@@ -4,10 +4,13 @@ import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
+import com.artsolo.bookswap.models.Quality;
 import com.artsolo.bookswap.services.QualityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/quality")
@@ -19,12 +22,8 @@ public class QualityController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addNewQuality(@RequestParam("quality") String quality) {
-        if (qualityService.addNewQuality(quality)) {
-            return ResponseEntity.ok().body(MessageResponse.builder().message("Quality was added successfully").build());
-        }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Filed to add new quality")).build());
+    public ResponseEntity<SuccessResponse<Quality>> addNewQuality(@RequestParam("quality") String quality) {
+        return ResponseEntity.ok().body(new SuccessResponse<>(qualityService.addNewQuality(quality)));
     }
 
     @DeleteMapping("/delete/{id}")
@@ -37,12 +36,12 @@ public class QualityController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getQualityById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(qualityService.getQualityById(id)).build());
+    public ResponseEntity<SuccessResponse<Quality>> getQualityById(@PathVariable Long id) {
+        return ResponseEntity.ok().body(new SuccessResponse<>(qualityService.getQualityById(id)));
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<?> getAllQualities() {
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(qualityService.getAllQualities()).build());
+    public ResponseEntity<SuccessResponse<List<Quality>>> getAllQualities() {
+        return ResponseEntity.ok().body(new SuccessResponse<>(qualityService.getAllQualities()));
     }
 }

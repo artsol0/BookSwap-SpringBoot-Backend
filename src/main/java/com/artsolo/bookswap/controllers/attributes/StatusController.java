@@ -4,10 +4,13 @@ import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
+import com.artsolo.bookswap.models.Status;
 import com.artsolo.bookswap.services.StatusService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/status")
@@ -19,12 +22,8 @@ public class StatusController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addNewStatus(@RequestParam("status") String status) {
-        if (statusService.addNewStatus(status)) {
-            return ResponseEntity.ok().body(MessageResponse.builder().message("Status was added successfully").build());
-        }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Filed to add new status")).build());
+    public ResponseEntity<SuccessResponse<Status>> addNewStatus(@RequestParam("status") String status) {
+        return ResponseEntity.ok().body(new SuccessResponse<>(statusService.addNewStatus(status)));
     }
 
     @DeleteMapping("/delete/{id}")
@@ -37,12 +36,12 @@ public class StatusController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getStatusById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(statusService.getStatusById(id)).build());
+    public ResponseEntity<SuccessResponse<Status>> getStatusById(@PathVariable Long id) {
+        return ResponseEntity.ok().body(new SuccessResponse<>(statusService.getStatusById(id)));
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<?> getAllStatuses() {
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(statusService.getAllStatuses()).build());
+    public ResponseEntity<SuccessResponse<List<Status>>> getAllStatuses() {
+        return ResponseEntity.ok().body(new SuccessResponse<>(statusService.getAllStatuses()));
     }
 }

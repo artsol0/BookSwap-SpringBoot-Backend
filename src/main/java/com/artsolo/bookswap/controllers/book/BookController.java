@@ -12,6 +12,7 @@ import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -61,7 +63,8 @@ public class BookController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateBookById(@PathVariable Long id, @ModelAttribute @Valid UpdateBookRequest request, Principal currentUser) {
+    public ResponseEntity<?> updateBookById(@PathVariable Long id, @ModelAttribute @Valid UpdateBookRequest request,
+                                            Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Book book = bookService.getBookById(id);
         if (bookService.userIsBookOwner(user, book) || (user.getRole().equals(Role.ADMINISTRATOR) || user.getRole().equals(Role.MODERATOR))) {
@@ -73,7 +76,8 @@ public class BookController {
     }
 
     @PutMapping("/change-photo/{id}")
-    public ResponseEntity<?> changeBookPhoto(@PathVariable Long id, @RequestParam("photo") MultipartFile photo, Principal currentUser) {
+    public ResponseEntity<?> changeBookPhoto(@PathVariable Long id, @RequestParam("photo") MultipartFile photo,
+                                             Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Book book = bookService.getBookById(id);
         if (bookService.userIsBookOwner(user, book) || (user.getRole().equals(Role.ADMINISTRATOR) || user.getRole().equals(Role.MODERATOR))) {
@@ -106,26 +110,24 @@ public class BookController {
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<?> getAllBooks(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "") String keyword)
+    public ResponseEntity<SuccessResponse<Page<BookResponse>>> getAllBooks(@RequestParam(defaultValue = "0") int page,
+                                                                           @RequestParam(defaultValue = "") String keyword)
     {
         Pageable pageable =  PageRequest.of(page, 10);
         if (keyword.isEmpty()) {
-            return ResponseEntity.ok().body(SuccessResponse.builder()
-                    .data(bookService.getAllBooksPaged(pageable)).build());
+            return ResponseEntity.ok().body(new SuccessResponse<>(bookService.getAllBooksPaged(pageable)));
         } else {
-            return ResponseEntity.ok().body(SuccessResponse.builder()
-                    .data(bookService.getAllBooksPagedByKeyword(pageable, keyword)).build());
+            return ResponseEntity.ok().body(new SuccessResponse<>(bookService.getAllBooksPagedByKeyword(pageable, keyword)));
         }
     }
 
     @GetMapping("/get/by/user")
-    public ResponseEntity<?> getCurrentUserBooks(@RequestParam(defaultValue = "0") int page, Principal currentUser) {
+    public ResponseEntity<SuccessResponse<Page<BookResponse>>> getCurrentUserBooks(
+            @RequestParam(defaultValue = "0") int page, Principal currentUser)
+    {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Pageable pageable =  PageRequest.of(page, 10);
-        return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(bookService.getBooksPagedByUser(pageable, user)).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(bookService.getBooksPagedByUser(pageable, user)));
     }
 
     @PostMapping("/get/by/attributes")
@@ -150,16 +152,16 @@ public class BookController {
     }
 
     @GetMapping("/photo")
-    public ResponseEntity<?> getBookPhoto(@RequestParam("id") Long id) {
+    public ResponseEntity<byte[]> getBookPhoto(@RequestParam("id") Long id) {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(bookService.getBookPhoto(bookService.getBookById(id)));
     }
 
     @GetMapping("/get/{id}/additional-info")
-    public ResponseEntity<?> getBookAdditionalInfo(@PathVariable("id") Long id, Principal currentUser) {
+    public ResponseEntity<SuccessResponse<BookAdditionalInfo>> getBookAdditionalInfo(@PathVariable("id") Long id,
+                                                                                     Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Book book = bookService.getBookById(id);
-        return ResponseEntity.ok()
-                .body(SuccessResponse.builder().data(bookService.getBookAdditionalInfo(user, book)).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(bookService.getBookAdditionalInfo(user, book)));
     }
 
 

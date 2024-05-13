@@ -15,11 +15,9 @@ public class LanguageService {
         this.languageRepository = languageRepository;
     }
 
-    public boolean addNewLanguage(String language) {
-        Language newLanguage = new Language();
-        newLanguage.setLanguage(language);
-        newLanguage = languageRepository.save(newLanguage);
-        return languageRepository.existsById(newLanguage.getId());
+    public Language addNewLanguage(String language) {
+        Language newLanguage = Language.builder().language(language).build();
+        return languageRepository.save(newLanguage);
     }
 
     public boolean deleteLanguage(Language language) {

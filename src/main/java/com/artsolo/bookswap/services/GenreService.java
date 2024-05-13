@@ -15,10 +15,9 @@ public class GenreService {
         this.genreRepository = genreRepository;
     }
 
-    public boolean addNewGenre(String genreName) {
+    public Genre addNewGenre(String genreName) {
         Genre newGenre = Genre.builder().genre(genreName).build();
-        newGenre = genreRepository.save(newGenre);
-        return genreRepository.existsById(newGenre.getId());
+        return genreRepository.save(newGenre);
     }
 
     public boolean deleteGenre(Genre genre) {

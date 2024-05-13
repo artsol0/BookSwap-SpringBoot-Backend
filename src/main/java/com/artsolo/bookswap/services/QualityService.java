@@ -15,11 +15,9 @@ public class QualityService {
         this.qualityRepository = qualityRepository;
     }
 
-    public boolean addNewQuality(String quality) {
-        Quality newQuality = new Quality();
-        newQuality.setQuality(quality);
-        newQuality = qualityRepository.save(newQuality);
-        return qualityRepository.existsById(newQuality.getId());
+    public Quality addNewQuality(String quality) {
+        Quality newQuality = Quality.builder().quality(quality).build();
+        return qualityRepository.save(newQuality);
     }
 
     public boolean deleteQuality(Quality quality) {

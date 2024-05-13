@@ -26,37 +26,37 @@ public class UserController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+    public ResponseEntity<SuccessResponse<UserResponse>> getUserById(@PathVariable Long id) {
         UserResponse userResponse = userService.getUserResponse(userService.getUserById(id));
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(userResponse).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(userResponse));
     }
 
     @GetMapping("/get/current")
-    public ResponseEntity<?> getCurrentUser(Principal currentUser) {
+    public ResponseEntity<SuccessResponse<UserResponse>> getCurrentUser(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(userService.getUserResponse(user)).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(userService.getUserResponse(user)));
     }
 
     @GetMapping("/get/current-id")
-    public ResponseEntity<?> getCurrentUserId(Principal currentUser) {
+    public ResponseEntity<SuccessResponse<Long>> getCurrentUserId(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(user.getId()).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(user.getId()));
     }
 
     @PutMapping("/change-location")
-    public ResponseEntity<?> changeLocation(@RequestBody @Valid LocationChangeRequest request, Principal currentUser) {
+    public ResponseEntity<MessageResponse> changeLocation(@RequestBody @Valid LocationChangeRequest request, Principal currentUser) {
         userService.changeUserLocation(request, currentUser);
         return ResponseEntity.ok().body(MessageResponse.builder().message("Location changed successfully").build());
     }
 
     @PutMapping("/change-photo")
-    public ResponseEntity<?> changePhoto(@RequestParam("photo") MultipartFile photo, Principal currentUser) {
+    public ResponseEntity<MessageResponse> changePhoto(@RequestParam("photo") MultipartFile photo, Principal currentUser) {
         userService.changeUserPhoto(photo, currentUser);
         return ResponseEntity.ok().body(MessageResponse.builder().message("Photo changed successfully").build());
     }
 
     @PutMapping("/change-activity/{id}")
-    public ResponseEntity<?> changeActivityById(@PathVariable Long id) {
+    public ResponseEntity<MessageResponse> changeActivityById(@PathVariable Long id) {
         if (userService.changeUserActivity(userService.getUserById(id))) {
             return ResponseEntity.ok().body(MessageResponse.builder().message("User is active").build());
         }
@@ -64,7 +64,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/set-role")
-    public ResponseEntity<?> setUserRole(@PathVariable Long id, @RequestParam("role") String role) {
+    public ResponseEntity<MessageResponse> setUserRole(@PathVariable Long id, @RequestParam("role") String role) {
         if (userService.setUserRole(userService.getUserById(id), Role.valueOf(role))) {
             return ResponseEntity.ok().body(MessageResponse.builder().message("User role changed").build());
         }

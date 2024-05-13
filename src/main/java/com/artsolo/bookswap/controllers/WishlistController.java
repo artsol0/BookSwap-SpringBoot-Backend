@@ -1,5 +1,6 @@
 package com.artsolo.bookswap.controllers;
 
+import com.artsolo.bookswap.controllers.book.BookResponse;
 import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/wishlist")
@@ -42,8 +44,7 @@ public class WishlistController {
     }
 
     @GetMapping("/get-books")
-    public ResponseEntity<?> getAllWishlistBooks(Principal currentUser) {
-        return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(wishlistService.getAllWishlistBooks(currentUser)).build());
+    public ResponseEntity<SuccessResponse<List<BookResponse>>> getAllWishlistBooks(Principal currentUser) {
+        return ResponseEntity.ok().body(new SuccessResponse<>(wishlistService.getAllWishlistBooks(currentUser)));
     }
 }

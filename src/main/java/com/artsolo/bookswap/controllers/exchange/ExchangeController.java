@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -63,23 +64,21 @@ public class ExchangeController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getExchangeById(@PathVariable Long id) {
+    public ResponseEntity<SuccessResponse<ExchangeResponse>> getExchangeById(@PathVariable Long id) {
         ExchangeResponse exchangeResponse = exchangeService.getExchangeResponse(exchangeService.getExchangeById(id));
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(exchangeResponse).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(exchangeResponse));
     }
 
     @GetMapping("/get/initiation")
-    public ResponseEntity<?> getAllInitiateExchanges(Principal currentUser) {
+    public ResponseEntity<SuccessResponse<List<ExchangeResponse>>> getAllInitiateExchanges(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(exchangeService.getAllUserInitiateExchanges(user)).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(exchangeService.getAllUserInitiateExchanges(user)));
     }
 
     @GetMapping("/get/recipient")
-    public ResponseEntity<?> getAllRecipientExchanges(Principal currentUser) {
+    public ResponseEntity<SuccessResponse<List<ExchangeResponse>>> getAllRecipientExchanges(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(exchangeService.getAllUserRecipientExchanges(user)).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(exchangeService.getAllUserRecipientExchanges(user)));
     }
 
     @PutMapping("/confirm/{id}")

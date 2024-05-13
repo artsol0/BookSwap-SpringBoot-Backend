@@ -21,16 +21,16 @@ public class LocationController {
     public LocationController(LocationService locationService) {this.locationService = locationService;}
 
     @GetMapping("/get/countries")
-    public ResponseEntity<?> getCountries() throws URISyntaxException, JsonProcessingException {
+    public ResponseEntity<SuccessResponse<List<CountryResponse>>> getCountries() throws URISyntaxException, JsonProcessingException {
         ResponseEntity<String> responseEntity = locationService.getAllCountries();
         List<CountryResponse> countries = locationService.getCountriesResponse(responseEntity);
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(countries).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(countries));
     }
 
     @GetMapping("/get/countries/{iso2}/cities")
-    public ResponseEntity<?> getCities(@PathVariable String iso2) throws URISyntaxException, JsonProcessingException {
+    public ResponseEntity<SuccessResponse<List<CityResponse>>> getCities(@PathVariable String iso2) throws URISyntaxException, JsonProcessingException {
         ResponseEntity<String> responseEntity = locationService.getCitiesByCountry(iso2);
         List<CityResponse> cities = locationService.getCitiesResponse(responseEntity);
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(cities).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(cities));
     }
 }

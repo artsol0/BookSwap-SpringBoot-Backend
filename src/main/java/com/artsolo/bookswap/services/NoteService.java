@@ -1,6 +1,6 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.note.GetNoteResponse;
+import com.artsolo.bookswap.controllers.note.NoteResponse;
 import com.artsolo.bookswap.models.Book;
 import com.artsolo.bookswap.models.Note;
 import com.artsolo.bookswap.models.User;
@@ -29,11 +29,11 @@ public class NoteService {
         noteRepository.save(newNote);
     }
 
-    public List<GetNoteResponse> getNotesByBook(Book book) {
+    public List<NoteResponse> getNotesByBook(Book book) {
         List<Note> notes = noteRepository.findAllByBookId(book.getId());
-        List<GetNoteResponse> responses = new ArrayList<>();
+        List<NoteResponse> responses = new ArrayList<>();
         for (Note note : notes) {
-            responses.add(GetNoteResponse.builder()
+            responses.add(NoteResponse.builder()
                     .id(note.getId())
                     .country(note.getCountry())
                     .city(note.getCity())
