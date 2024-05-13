@@ -33,6 +33,7 @@ public class ExchangeController {
         User initiator = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         if (initiator.getPoints() >= 20) {
             if (exchangeService.createNewExchange(initiator, book)) {
+                userService.decreaseUserPoints(20, initiator);
                 return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was created successfully").build());
             }
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
@@ -46,8 +47,11 @@ public class ExchangeController {
     public ResponseEntity<?> deleteExchangeById(@PathVariable Long id, Principal currentUser) {
         Exchange exchange = exchangeService.getExchangeById(id);
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        if (exchangeService.userIsParticipantOfExchange(exchange, user)){
+        if (exchangeService.isUserParticipantOfExchange(exchange, user)){
             if (exchangeService.deleteExchange(exchange)) {
+                if (!exchangeService.isExchangeConfirmed(exchange)) {
+                    userService.increaseUserPoints(20, exchange.getInitiator());
+                }
                 return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was deleted successfully")
                         .build());
             }
@@ -82,10 +86,9 @@ public class ExchangeController {
     public ResponseEntity<?> confirmExchangeById(@PathVariable Long id, Principal currentUser) {
         Exchange exchange = exchangeService.getExchangeById(id);
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        if (!exchangeService.exchangeIsConfirmed(exchange)) {
-            if (exchangeService.userIsRecipientOfExchange(exchange, user)) {
+        if (!exchangeService.isExchangeConfirmed(exchange)) {
+            if (exchangeService.isUserRecipientOfExchange(exchange, user)) {
                 if (exchangeService.confirmExchange(exchange)) {
-                    userService.decreaseUserPoints(20, exchange.getInitiator());
                     userService.increaseUserPoints(25, exchange.getRecipient());
                     return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was confirmed successfully")
                             .build());

@@ -64,25 +64,44 @@ public class ExchangeService {
     @Transactional
     public boolean confirmExchange(Exchange exchange) {
         if (bookService.changeBookOwner(exchange.getBook(), exchange.getInitiator())) {
-            exchange.setConfirmed(Boolean.TRUE);
-            exchange = exchangeRepository.save(exchange);
-            return exchange.getConfirmed();
+            if (changeExchangeConfirmStatus(exchange)) {
+                setNewRecipientForExchanges(
+                        exchangeRepository.findAllByBookId(exchange.getBook().getId()),
+                        exchange.getInitiator()
+                );
+                return true;
+            }
         }
         return false;
     }
 
-    public boolean exchangeIsConfirmed(Exchange exchange) {
+    public boolean isExchangeConfirmed(Exchange exchange) {
         return exchange.getConfirmed();
     }
 
-    public boolean userIsRecipientOfExchange(Exchange exchange, User providedRecipient) {
+    public boolean isUserRecipientOfExchange(Exchange exchange, User providedRecipient) {
         User actualRecipient = exchange.getRecipient();
         return actualRecipient.getId().equals(providedRecipient.getId());
     }
 
-    public boolean userIsParticipantOfExchange(Exchange exchange, User user) {
+    public boolean isUserParticipantOfExchange(Exchange exchange, User user) {
         User recipient = exchange.getRecipient();
         User initiator = exchange.getInitiator();
         return (user.getId().equals(recipient.getId()) || user.getId().equals(initiator.getId()));
+    }
+
+    private boolean changeExchangeConfirmStatus(Exchange exchange) {
+        exchange.setConfirmed(!exchange.getConfirmed());
+        exchange = exchangeRepository.save(exchange);
+        return exchange.getConfirmed();
+    }
+
+    private void setNewRecipientForExchanges(List<Exchange> exchanges, User newRecipient) {
+        exchanges.forEach(exchange -> {
+            if (!exchange.getInitiator().getId().equals(newRecipient.getId())) {
+                exchange.setRecipient(newRecipient);
+                exchangeRepository.save(exchange);
+            }
+        });
     }
 }

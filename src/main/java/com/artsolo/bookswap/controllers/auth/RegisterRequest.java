@@ -2,14 +2,12 @@ package com.artsolo.bookswap.controllers.auth;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class RegisterRequest {
 
     @NotBlank(message = "Nickname is mandatory")
