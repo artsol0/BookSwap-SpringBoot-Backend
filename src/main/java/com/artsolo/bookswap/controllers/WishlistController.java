@@ -5,11 +5,13 @@ import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
 import com.artsolo.bookswap.controllers.responses.SuccessResponse;
+import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.services.BookService;
 import com.artsolo.bookswap.services.WishlistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -25,13 +27,15 @@ public class WishlistController {
 
     @PostMapping("/add-book/{id}")
     public ResponseEntity<MessageResponse> addBookToWishlist(@PathVariable Long id, Principal currentUser) {
-        wishlistService.addBookToWishlist(bookService.getBookById(id), currentUser);
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        wishlistService.addBookToWishlist(bookService.getBookById(id), user);
         return ResponseEntity.ok().body(MessageResponse.builder().message("Book was added to wishlist successfully").build());
     }
 
     @DeleteMapping("/remove-book/{id}")
     public ResponseEntity<?> removeBookFromWishlist(@PathVariable Long id, Principal currentUser) {
-        if (wishlistService.removeBookFromWishlist(bookService.getBookById(id), currentUser)) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        if (wishlistService.removeBookFromWishlist(bookService.getBookById(id), user)) {
             return ResponseEntity.ok().body(MessageResponse.builder().message("Book removed from wishlist successfully")
                     .build());
         }
@@ -41,6 +45,7 @@ public class WishlistController {
 
     @GetMapping("/get-books")
     public ResponseEntity<SuccessResponse<List<BookResponse>>> getAllWishlistBooks(Principal currentUser) {
-        return ResponseEntity.ok().body(new SuccessResponse<>(wishlistService.getAllWishlistBooks(currentUser)));
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        return ResponseEntity.ok().body(new SuccessResponse<>(wishlistService.getAllWishlistBooks(user)));
     }
 }

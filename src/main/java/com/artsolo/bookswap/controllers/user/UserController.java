@@ -45,13 +45,15 @@ public class UserController {
 
     @PutMapping("/change-location")
     public ResponseEntity<MessageResponse> changeLocation(@RequestBody @Valid LocationChangeRequest request, Principal currentUser) {
-        userService.changeUserLocation(request, currentUser);
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        userService.changeUserLocation(request, user);
         return ResponseEntity.ok().body(MessageResponse.builder().message("Location changed successfully").build());
     }
 
     @PutMapping("/change-photo")
     public ResponseEntity<MessageResponse> changePhoto(@RequestParam("photo") MultipartFile photo, Principal currentUser) {
-        userService.changeUserPhoto(photo, currentUser);
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        userService.changeUserPhoto(photo, user);
         return ResponseEntity.ok().body(MessageResponse.builder().message("Photo changed successfully").build());
     }
 
@@ -73,7 +75,8 @@ public class UserController {
 
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody @Valid PasswordChangeRequest request, Principal currentUser) {
-        String result = userService.changeUserPassword(request, currentUser);
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        String result = userService.changeUserPassword(request, user);
         if (result.contains("successfully")) {
             return ResponseEntity.ok().body(MessageResponse.builder().message(result).build());
         }

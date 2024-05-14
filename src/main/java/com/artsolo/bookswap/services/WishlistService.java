@@ -17,22 +17,19 @@ public class WishlistService {
 
     public WishlistService(WishlistRepository wishlistRepository) {this.wishlistRepository = wishlistRepository;}
 
-    public void addBookToWishlist(Book book, Principal currentUser) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+    public void addBookToWishlist(Book book, User user) {
         CompositeKey compositeKey = new CompositeKey(user.getId(), book.getId());
         Wishlist wishlist = new Wishlist(compositeKey, user, book);
         wishlistRepository.save(wishlist);
     }
 
-    public boolean removeBookFromWishlist(Book book, Principal currentUser) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+    public boolean removeBookFromWishlist(Book book, User user) {
         CompositeKey compositeKey = new CompositeKey(user.getId(), book.getId());
         wishlistRepository.deleteById(compositeKey);
         return !wishlistRepository.existsById(compositeKey);
     }
 
-    public List<BookResponse> getAllWishlistBooks(Principal currentUser) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+    public List<BookResponse> getAllWishlistBooks(User user) {
         List<Wishlist> wishlists = wishlistRepository.findByUserId(user.getId());
         return wishlists.stream().map(this::getBookResponse).collect(Collectors.toList());
     }

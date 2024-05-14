@@ -29,7 +29,7 @@ public class LocationService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public LocationService() throws IOException {
+    public LocationService() {
         this.headers.setContentType(MediaType.APPLICATION_JSON);
         this.headers.set("X-CSCAPI-KEY", getAPIkey());
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

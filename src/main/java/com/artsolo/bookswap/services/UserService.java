@@ -56,8 +56,7 @@ public class UserService {
         return user.getRole().equals(role);
     }
 
-    public void changeUserPhoto(MultipartFile photo, Principal currentUser) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+    public void changeUserPhoto(MultipartFile photo, User user) {
         try {
             byte[] newPhoto = photo.getBytes();
             user.setPhoto(newPhoto);
@@ -67,8 +66,7 @@ public class UserService {
         }
     }
 
-    public void changeUserLocation(LocationChangeRequest request, Principal currentUser) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+    public void changeUserLocation(LocationChangeRequest request, User user) {
         user.setCountry(request.getCountry());
         user.setCity(request.getCity());
         userRepository.save(user);
@@ -86,8 +84,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public String changeUserPassword(PasswordChangeRequest request, Principal currentUser) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+    public String changeUserPassword(PasswordChangeRequest request, User user) {
         if(passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             if (!passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
                 user.setPassword(passwordEncoder.encode(request.getNewPassword()));
