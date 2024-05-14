@@ -1,12 +1,12 @@
 package com.artsolo.bookswap.repositoryes;
 
 import com.artsolo.bookswap.models.CompositeKey;
+import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.models.Wishlist;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface WishlistRepository extends JpaRepository<Wishlist, CompositeKey> {
-    List<Wishlist> findByUserId(Long userId);
+    List<Wishlist> findByUser(User user);
 }

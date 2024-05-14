@@ -91,7 +91,7 @@ public class BookController {
     public ResponseEntity<SuccessResponse<Page<BookResponse>>> getAllBooks(@RequestParam(defaultValue = "0") int page,
                                                                            @RequestParam(defaultValue = "") String keyword)
     {
-        Pageable pageable =  PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, 10);
         if (keyword.isEmpty()) {
             return ResponseEntity.ok().body(new SuccessResponse<>(bookService.getAllBooksPaged(pageable)));
         } else {
@@ -104,14 +104,14 @@ public class BookController {
             @RequestParam(defaultValue = "0") int page, Principal currentUser)
     {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        Pageable pageable =  PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, 10);
         return ResponseEntity.ok().body(new SuccessResponse<>(bookService.getBooksPagedByUser(pageable, user)));
     }
 
     @PostMapping("/get/by/attributes")
     public ResponseEntity<SuccessResponse<Page<BookResponse>>> getBooksByAttributes(@RequestParam(defaultValue = "0") int page,
                                                   @RequestBody @Valid FindByAttributesRequest request) {
-        Pageable pageable =  PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, 10);
         return ResponseEntity.ok().body(new SuccessResponse<>(bookService.getAllBooksPagedByAttributes(pageable, request)));
     }
 

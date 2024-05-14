@@ -3,10 +3,8 @@ package com.artsolo.bookswap.services;
 import com.artsolo.bookswap.controllers.book.BookResponse;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.WishlistRepository;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +28,7 @@ public class WishlistService {
     }
 
     public List<BookResponse> getAllWishlistBooks(User user) {
-        List<Wishlist> wishlists = wishlistRepository.findByUserId(user.getId());
+        List<Wishlist> wishlists = wishlistRepository.findByUser(user);
         return wishlists.stream().map(this::getBookResponse).collect(Collectors.toList());
     }
 
