@@ -1,4 +1,4 @@
-package com.artsolo.bookswap.controllers.book;
+package com.artsolo.bookswap.controllers.review;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

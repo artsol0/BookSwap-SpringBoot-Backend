@@ -1,7 +1,7 @@
 package com.artsolo.bookswap.services;
 
-import com.artsolo.bookswap.controllers.book.ReviewRequest;
-import com.artsolo.bookswap.controllers.book.ReviewResponse;
+import com.artsolo.bookswap.controllers.review.ReviewRequest;
+import com.artsolo.bookswap.controllers.review.ReviewResponse;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.Book;
 import com.artsolo.bookswap.models.CompositeKey;
@@ -49,8 +49,7 @@ public class ReviewService {
                 .build();
     }
 
-    public boolean addBookRevive(Book book, ReviewRequest reviewRequest, Principal currentUser) {
-        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+    public ReviewResponse addBookRevive(Book book, ReviewRequest reviewRequest, User user) {
         CompositeKey compositeKey = new CompositeKey(user.getId(), book.getId());
         Review review = Review.builder()
                 .reviewId(compositeKey)
@@ -60,8 +59,7 @@ public class ReviewService {
                 .review(reviewRequest.getReview())
                 .build();
 
-        review = reviewRepository.save(review);
-        return reviewRepository.existsById(review.getReviewId());
+        return getReviewResponse(reviewRepository.save(review));
     }
 
     public void updateReview(Review review, Integer rating, String reviewText) {

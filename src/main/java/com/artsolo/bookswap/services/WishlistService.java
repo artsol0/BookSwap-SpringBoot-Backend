@@ -17,12 +17,11 @@ public class WishlistService {
 
     public WishlistService(WishlistRepository wishlistRepository) {this.wishlistRepository = wishlistRepository;}
 
-    public boolean addBookToWishlist(Book book, Principal currentUser) {
+    public void addBookToWishlist(Book book, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         CompositeKey compositeKey = new CompositeKey(user.getId(), book.getId());
         Wishlist wishlist = new Wishlist(compositeKey, user, book);
         wishlistRepository.save(wishlist);
-        return wishlistRepository.existsById(compositeKey);
     }
 
     public boolean removeBookFromWishlist(Book book, Principal currentUser) {

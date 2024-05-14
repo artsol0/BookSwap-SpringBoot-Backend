@@ -1,7 +1,5 @@
-package com.artsolo.bookswap.controllers;
+package com.artsolo.bookswap.controllers.review;
 
-import com.artsolo.bookswap.controllers.book.ReviewRequest;
-import com.artsolo.bookswap.controllers.book.ReviewResponse;
 import com.artsolo.bookswap.controllers.responses.ErrorDescription;
 import com.artsolo.bookswap.controllers.responses.ErrorResponse;
 import com.artsolo.bookswap.controllers.responses.MessageResponse;
@@ -33,14 +31,13 @@ public class ReviewController {
     private final BookService bookService;
 
     @PostMapping("/{bookId}/add-review")
-    public ResponseEntity<?> addBookReview(@PathVariable Long bookId, @RequestBody @Valid ReviewRequest request,
-                                           Principal currentUser)
+    public ResponseEntity<SuccessResponse<ReviewResponse>> addBookReview(@PathVariable Long bookId,
+                                                                         @RequestBody @Valid ReviewRequest request,
+                                                                         Principal currentUser)
     {
-        if (reviewService.addBookRevive(bookService.getBookById(bookId), request, currentUser)){
-            return ResponseEntity.ok().body(new MessageResponse("Review was added successfully"));
-        }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Failed to add review")).build());
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        ReviewResponse response = reviewService.addBookRevive(bookService.getBookById(bookId), request, user);
+        return ResponseEntity.ok().body(new SuccessResponse<>(response));
     }
 
     @GetMapping("/{bookId}/get-reviews")
@@ -72,24 +69,15 @@ public class ReviewController {
     @PutMapping("/update/{userId}/{bookId}")
     public ResponseEntity<?> updateReviewById(@PathVariable Long userId, @PathVariable Long bookId,
                                               @RequestBody @Valid ReviewRequest request, Principal currentUser) {
-        if (request.getReview() != null && request.getRating() != null) {
-            User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-            Review review = reviewService.getReviewById(userId, bookId);
-            if (reviewService.userIsReviewWriter(user, review) ||
-                    (user.getRole().equals(Role.ADMINISTRATOR) ||
-                    user.getRole().equals(Role.MODERATOR))) {
-                reviewService.updateReview(
-                        review,
-                        request.getRating(),
-                        request.getReview()
-                );
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        Review review = reviewService.getReviewById(userId, bookId);
+        if (reviewService.userIsReviewWriter(user, review) || (user.getRole().equals(Role.ADMINISTRATOR) ||
+                user.getRole().equals(Role.MODERATOR))) {
+                reviewService.updateReview(review, request.getRating(), request.getReview());
                 return ResponseEntity.ok().body(MessageResponse.builder().message("Review was updated").build());
             }
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.FORBIDDEN.value(), "You are not review writer")).build());
-        }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
+                HttpStatus.FORBIDDEN.value(), "You are not review writer")).build());
     }
 
     @DeleteMapping("/delete/{userId}/{bookId}")
@@ -102,7 +90,7 @@ public class ReviewController {
                 return ResponseEntity.ok().body(MessageResponse.builder().message("Review was deleted successfully").build());
             }
             return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Review still in the library")).build());
+                    HttpStatus.BAD_REQUEST.value(), "Review still exist")).build());
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
                 HttpStatus.FORBIDDEN.value(), "You are not review writer")).build());

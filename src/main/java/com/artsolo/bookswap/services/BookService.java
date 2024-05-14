@@ -9,6 +9,7 @@ import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.*;
 import com.artsolo.bookswap.repositoryes.*;
 import com.artsolo.bookswap.specifications.BookSpecification;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,7 @@ public class BookService {
     private final StatusService statusService;
     private final LanguageService languageService;
     private final NoteService noteService;
+    private final UserService userService;
 
     public Book getBookById(Long id) {
         return bookRepository.findById(id).orElseThrow(() -> new NoDataFoundException("Book", id));
@@ -80,27 +82,8 @@ public class BookService {
                         .build();
     }
 
-    public List<BookResponse> getBooksByGenreId(Long id) {
-        List<Book> books = bookRepository.findAllByGenreId(id);
-        return books.stream().map(this::getBookResponse).collect(Collectors.toList());
-    }
-
-    public List<BookResponse> getBooksByLanguageId(Long id) {
-        List<Book> books = bookRepository.findAllByLanguageId(id);
-        return books.stream().map(this::getBookResponse).collect(Collectors.toList());
-    }
-
-    public List<BookResponse> getBooksByTitleOrAuthor(String keyword) {
-        List<Book> books = bookRepository.findAllByTitleOrAuthorContaining(keyword);
-        return books.stream().map(this::getBookResponse).collect(Collectors.toList());
-    }
-
-    public List<BookResponse> getBooksByGenreIdAndLanguageId(Long genreId, Long languageId) {
-        List<Book> books = bookRepository.findAllByGenreIdAndLanguageId(genreId, languageId);
-        return books.stream().map(this::getBookResponse).collect(Collectors.toList());
-    }
-
-    public boolean addNewBook(AddBookRequest addBookRequest, User user) throws IOException, NoDataFoundException {
+    @Transactional
+    public BookResponse addNewBook(AddBookRequest addBookRequest, User user) throws IOException, NoDataFoundException {
         List<Genre> genres = addBookRequest.getGenreIds().stream().map(genreService::getGenreById).collect(Collectors.toList());
         Quality quality = qualityService.getQualityById(addBookRequest.getQualityId());
         Status status = statusService.getStatusById(addBookRequest.getStatusId());
@@ -121,7 +104,8 @@ public class BookService {
 
         Book newBook = bookRepository.save(book);
         noteService.note(user, newBook);
-        return bookRepository.existsById(newBook.getId());
+        userService.increaseUserPoints(10, user);
+        return getBookResponse(newBook);
     }
 
     public boolean deleteBook(Book book) {
@@ -158,13 +142,6 @@ public class BookService {
     }
 
     public byte[] getBookPhoto(Book book) {return book.getPhoto();}
-
-    public boolean bookRequestIsValid(AddBookRequest request) {
-        return (request.getTitle() != null && request.getAuthor() != null
-                && request.getDescription() != null && request.getGenreIds() != null
-                && request.getQualityId() != null && request.getStatusId() != null
-                && request.getLanguageId() != null && request.getPhoto() != null);
-    }
 
     public BookAdditionalInfo getBookAdditionalInfo(User user, Book book) {
         return BookAdditionalInfo.builder()

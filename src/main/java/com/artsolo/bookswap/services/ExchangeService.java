@@ -17,16 +17,18 @@ public class ExchangeService {
 
     private final ExchangeRepository exchangeRepository;
     private final BookService bookService;
+    private final UserService userService;
 
-    public boolean createNewExchange(User initiator, Book book) {
+    @Transactional
+    public void createNewExchange(User initiator, Book book) {
         Exchange exchange = Exchange.builder()
                 .initiator(initiator)
                 .recipient(book.getOwner())
                 .book(book)
                 .confirmed(Boolean.FALSE)
                 .build();
-        exchange = exchangeRepository.save(exchange);
-        return exchangeRepository.existsById(exchange.getId());
+        exchangeRepository.save(exchange);
+        userService.decreaseUserPoints(20, initiator);
     }
 
     public Exchange getExchangeById(Long id) {

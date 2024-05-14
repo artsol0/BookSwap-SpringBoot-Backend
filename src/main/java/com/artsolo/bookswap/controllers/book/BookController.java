@@ -24,8 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/book")
@@ -36,14 +34,9 @@ public class BookController {
     private final UserService userService;
 
     @PostMapping("/add")
-    public ResponseEntity<?> addNewBook(@ModelAttribute @Valid AddBookRequest request, Principal currentUser) throws IOException {
+    public ResponseEntity<SuccessResponse<BookResponse>> addNewBook(@ModelAttribute @Valid AddBookRequest request, Principal currentUser) throws IOException {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        if (bookService.addNewBook(request, user)) {
-            userService.increaseUserPoints(10, user);
-            return ResponseEntity.ok().body(MessageResponse.builder().message("Book was added successfully").build());
-        }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Filed to add new book")).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(bookService.addNewBook(request, user)));
     }
 
     @DeleteMapping("/delete/{id}")
@@ -89,24 +82,9 @@ public class BookController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<?> getBookById(@PathVariable Long id) {
+    public ResponseEntity<SuccessResponse<BookResponse>> getBookById(@PathVariable Long id) {
         BookResponse bookResponse = bookService.getBookResponse(bookService.getBookById(id));
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(bookResponse).build());
-    }
-
-    @GetMapping("/get/by/genre/{id}")
-    public ResponseEntity<?> getBooksByGenreId(@PathVariable Long id) {
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(bookService.getBooksByGenreId(id)).build());
-    }
-
-    @GetMapping("/get/by/language/{id}")
-    public ResponseEntity<?> getBooksByLanguageId(@PathVariable Long id) {
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(bookService.getBooksByLanguageId(id)).build());
-    }
-
-    @GetMapping("/get/by/keyword")
-    public ResponseEntity<?> getBooksByTitleOrAuthor(@RequestParam("word") String keyword) {
-        return ResponseEntity.ok().body(SuccessResponse.builder().data(bookService.getBooksByTitleOrAuthor(keyword)).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(bookResponse));
     }
 
     @GetMapping("/get/all")
@@ -131,24 +109,10 @@ public class BookController {
     }
 
     @PostMapping("/get/by/attributes")
-    public ResponseEntity<?> getBooksByAttributes(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<SuccessResponse<Page<BookResponse>>> getBooksByAttributes(@RequestParam(defaultValue = "0") int page,
                                                   @RequestBody @Valid FindByAttributesRequest request) {
         Pageable pageable =  PageRequest.of(page, 10);
-        return ResponseEntity.ok().body(SuccessResponse.builder()
-                .data(bookService.getAllBooksPagedByAttributes(pageable, request)).build());
-    }
-
-    @GetMapping("/get/by/genre/and/language")
-    public ResponseEntity<?> getBooksByGenreAndLanguage(@RequestBody Map<String, String> request) {
-        if (request.get("genreId") != null && request.get("languageId") != null) {
-            return ResponseEntity.ok().body(SuccessResponse.builder()
-                    .data(bookService.getBooksByGenreIdAndLanguageId(
-                            Long.parseLong(request.get("genreId")),
-                            Long.parseLong(request.get("languageId"))
-                    )).build());
-            }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Bad request")).build());
+        return ResponseEntity.ok().body(new SuccessResponse<>(bookService.getAllBooksPagedByAttributes(pageable, request)));
     }
 
     @GetMapping("/photo")

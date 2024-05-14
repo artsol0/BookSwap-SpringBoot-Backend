@@ -33,12 +33,8 @@ public class ExchangeController {
         Book book = bookService.getBookById(bookId);
         User initiator = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         if (initiator.getPoints() >= 20) {
-            if (exchangeService.createNewExchange(initiator, book)) {
-                userService.decreaseUserPoints(20, initiator);
-                return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was created successfully").build());
-            }
-            return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                    HttpStatus.BAD_REQUEST.value(), "Failed to create new exchange")).build());
+            exchangeService.createNewExchange(initiator, book);
+            return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was created successfully").build());
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(
                 HttpStatus.NOT_FOUND.value(), "You don't have enough points")).build());

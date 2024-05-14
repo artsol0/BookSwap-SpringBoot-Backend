@@ -24,13 +24,9 @@ public class WishlistController {
     private final BookService bookService;
 
     @PostMapping("/add-book/{id}")
-    public ResponseEntity<?> addBookToWishlist(@PathVariable Long id, Principal currentUser) {
-        if (wishlistService.addBookToWishlist(bookService.getBookById(id), currentUser)) {
-            return ResponseEntity.ok().body(MessageResponse.builder().message("Book was added to wishlist successfully")
-                    .build());
-        }
-        return ResponseEntity.badRequest().body(ErrorResponse.builder().error(new ErrorDescription(
-                HttpStatus.BAD_REQUEST.value(), "Failed to add book")).build());
+    public ResponseEntity<MessageResponse> addBookToWishlist(@PathVariable Long id, Principal currentUser) {
+        wishlistService.addBookToWishlist(bookService.getBookById(id), currentUser);
+        return ResponseEntity.ok().body(MessageResponse.builder().message("Book was added to wishlist successfully").build());
     }
 
     @DeleteMapping("/remove-book/{id}")
