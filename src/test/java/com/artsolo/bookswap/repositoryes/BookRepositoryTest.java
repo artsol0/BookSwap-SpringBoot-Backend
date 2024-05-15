@@ -20,9 +20,9 @@ class BookRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    private final User firstUser = User.builder().build();
-    private final User secondUser = User.builder().build();
-    private final User thirdUser = User.builder().build();
+    private final User firstUser = new User();
+    private final User secondUser = new User();
+    private final User thirdUser = new User();
 
     @BeforeEach
     void setUp() {

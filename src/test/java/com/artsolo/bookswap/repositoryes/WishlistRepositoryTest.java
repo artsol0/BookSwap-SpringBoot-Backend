@@ -26,12 +26,12 @@ class WishlistRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    private final User firstUser = User.builder().build();
-    private final User secondUser = User.builder().build();
-    private final User thirdUser = User.builder().build();
+    private final User firstUser = new User();
+    private final User secondUser = new User();
+    private final User thirdUser = new User();
 
-    private final Book firstBook = Book.builder().build();
-    private final Book secondBook = Book.builder().build();
+    private final Book firstBook = new Book();
+    private final Book secondBook = new Book();
 
     @BeforeEach
     void setUp() {

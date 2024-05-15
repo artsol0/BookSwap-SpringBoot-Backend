@@ -21,8 +21,8 @@ class NoteRepositoryTest {
     @Autowired
     private BookRepository bookRepository;
 
-    private final Book firstBook = Book.builder().build();
-    private final Book secondBook = Book.builder().build();
+    private final Book firstBook = new Book();
+    private final Book secondBook = new Book();
 
     @BeforeEach
     void setUp() {
