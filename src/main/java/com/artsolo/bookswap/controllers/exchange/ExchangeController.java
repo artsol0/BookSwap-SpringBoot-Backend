@@ -34,6 +34,7 @@ public class ExchangeController {
         User initiator = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         if (initiator.getPoints() >= 20) {
             exchangeService.createNewExchange(initiator, book);
+            userService.decreaseUserPoints(20, initiator);
             return ResponseEntity.ok().body(MessageResponse.builder().message("Exchange was created successfully").build());
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().error(new ErrorDescription(

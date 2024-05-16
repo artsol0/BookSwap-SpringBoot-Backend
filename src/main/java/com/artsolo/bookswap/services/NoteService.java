@@ -8,8 +8,8 @@ import com.artsolo.bookswap.repositoryes.NoteRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class NoteService {
@@ -31,15 +31,15 @@ public class NoteService {
 
     public List<NoteResponse> getNotesByBook(Book book) {
         List<Note> notes = noteRepository.findAllByBookId(book.getId());
-        List<NoteResponse> responses = new ArrayList<>();
-        for (Note note : notes) {
-            responses.add(NoteResponse.builder()
-                    .id(note.getId())
-                    .country(note.getCountry())
-                    .city(note.getCity())
-                    .date(note.getDate())
-                    .build());
-        }
-        return responses;
+        return notes.stream().map(this::getNoteResponse).collect(Collectors.toList());
+    }
+
+    public NoteResponse getNoteResponse(Note note) {
+        return NoteResponse.builder()
+                .id(note.getId())
+                .country(note.getCountry())
+                .city(note.getCity())
+                .date(note.getDate())
+                .build();
     }
 }

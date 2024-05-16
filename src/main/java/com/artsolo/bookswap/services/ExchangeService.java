@@ -17,9 +17,7 @@ public class ExchangeService {
 
     private final ExchangeRepository exchangeRepository;
     private final BookService bookService;
-    private final UserService userService;
 
-    @Transactional
     public void createNewExchange(User initiator, Book book) {
         Exchange exchange = Exchange.builder()
                 .initiator(initiator)
@@ -28,7 +26,6 @@ public class ExchangeService {
                 .confirmed(Boolean.FALSE)
                 .build();
         exchangeRepository.save(exchange);
-        userService.decreaseUserPoints(20, initiator);
     }
 
     public Exchange getExchangeById(Long id) {
@@ -92,13 +89,13 @@ public class ExchangeService {
         return (user.getId().equals(recipient.getId()) || user.getId().equals(initiator.getId()));
     }
 
-    private boolean changeExchangeConfirmStatus(Exchange exchange) {
+    public boolean changeExchangeConfirmStatus(Exchange exchange) {
         exchange.setConfirmed(!exchange.getConfirmed());
         exchange = exchangeRepository.save(exchange);
         return exchange.getConfirmed();
     }
 
-    private void setNewRecipientForExchanges(List<Exchange> exchanges, User newRecipient) {
+    public void setNewRecipientForExchanges(List<Exchange> exchanges, User newRecipient) {
         exchanges.forEach(exchange -> {
             if (!exchange.getInitiator().getId().equals(newRecipient.getId())) {
                 exchange.setRecipient(newRecipient);
