@@ -1,5 +1,6 @@
 package com.artsolo.bookswap.services;
 
+import com.artsolo.bookswap.models.Token;
 import com.artsolo.bookswap.repositoryes.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +28,7 @@ public class LogoutService implements LogoutHandler {
 
         jwt = authHeader.substring(7);
 
-        var storedToken = tokenRepository.findByToken(jwt).orElse(null);
+        Token storedToken = tokenRepository.findByToken(jwt).orElse(null);
         if (storedToken != null) {
             storedToken.setExpired(true);
             storedToken.setRevoked(true);

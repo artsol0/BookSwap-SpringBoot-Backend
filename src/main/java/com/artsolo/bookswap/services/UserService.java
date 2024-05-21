@@ -10,13 +10,11 @@ import com.artsolo.bookswap.repositoryes.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.security.Principal;
 
 @Service
 @Slf4j
@@ -62,7 +60,7 @@ public class UserService {
             user.setPhoto(newPhoto);
             userRepository.save(user);
         } catch (IOException e) {
-            log.error("Error occurred during changing user photo", e);
+            log.error("Error occurred during changing user photo: {}", e.getMessage());
         }
     }
 
@@ -74,12 +72,14 @@ public class UserService {
 
     @Transactional
     public void increaseUserPoints(int number, User user) {
+        if (number < 0) throw new IllegalArgumentException("Number can't be negative");
         user.setPoints(user.getPoints() + number);
         userRepository.save(user);
     }
 
     @Transactional
     public void decreaseUserPoints(int number, User user) {
+        if (number < 0) throw new IllegalArgumentException("Number can't be negative");
         user.setPoints(user.getPoints() - number);
         userRepository.save(user);
     }

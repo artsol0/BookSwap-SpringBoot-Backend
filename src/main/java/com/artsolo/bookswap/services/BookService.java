@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.jpa.domain.Specification.where;
@@ -83,29 +84,39 @@ public class BookService {
     }
 
     @Transactional
-    public BookResponse addNewBook(AddBookRequest addBookRequest, User user) throws IOException, NoDataFoundException {
-        List<Genre> genres = addBookRequest.getGenreIds().stream().map(genreService::getGenreById).collect(Collectors.toList());
-        Quality quality = qualityService.getQualityById(addBookRequest.getQualityId());
-        Status status = statusService.getStatusById(addBookRequest.getStatusId());
-        Language language = languageService.getLanguageById(addBookRequest.getLanguageId());
-        byte[] photo = addBookRequest.getPhoto().getBytes();
-
-        Book book = Book.builder()
-                .owner(user)
-                .title(addBookRequest.getTitle())
-                .author(addBookRequest.getAuthor())
-                .description(addBookRequest.getDescription())
-                .genres(genres)
-                .quality(quality)
-                .status(status)
-                .language(language)
-                .photo(photo)
-                .build();
-
+    public BookResponse addNewBook(AddBookRequest addBookRequest, User user) {
+        Book book = getBookFromAddRequest(addBookRequest).orElseThrow(() -> new IllegalArgumentException("Invalid add book request"));
+        book.setOwner(user);
         Book newBook = bookRepository.save(book);
+        newBook.setOwner(user);
         noteService.note(user, newBook);
         userService.increaseUserPoints(10, user);
         return getBookResponse(newBook);
+    }
+
+    public Optional<Book> getBookFromAddRequest(AddBookRequest addBookRequest) {
+        try {
+            List<Genre> genres = addBookRequest.getGenreIds().stream().map(genreService::getGenreById).collect(Collectors.toList());
+            Quality quality = qualityService.getQualityById(addBookRequest.getQualityId());
+            Status status = statusService.getStatusById(addBookRequest.getStatusId());
+            Language language = languageService.getLanguageById(addBookRequest.getLanguageId());
+            byte[] photo = addBookRequest.getPhoto().getBytes();
+
+            return Optional.of(Book.builder()
+                    .title(addBookRequest.getTitle())
+                    .author(addBookRequest.getAuthor())
+                    .description(addBookRequest.getDescription())
+                    .genres(genres)
+                    .quality(quality)
+                    .status(status)
+                    .language(language)
+                    .photo(photo)
+                    .build());
+
+        } catch (IOException e) {
+            log.error("Error occurred while reading book photo: {}", e.getMessage());
+            return Optional.empty();
+        }
     }
 
     public boolean deleteBook(Book book) {
@@ -113,7 +124,7 @@ public class BookService {
         return !bookRepository.existsById(book.getId());
     }
 
-    public void updateBook(Book book, UpdateBookRequest request) throws NoDataFoundException {
+    public void updateBook(Book book, UpdateBookRequest request) {
         book.setTitle(request.getTitle());
         book.setAuthor(request.getAuthor());
         book.setDescription(request.getDescription());

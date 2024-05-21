@@ -19,7 +19,6 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/exchange")
 public class ExchangeController {

@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -23,7 +21,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) throws IOException {
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         if (!authenticationService.isEmailTaken(request.getEmail())) {
                 if (!authenticationService.isNicknameTaken(request.getNickname())) {
                     authenticationService.register(request);

@@ -22,7 +22,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.security.Principal;
 
 @RestController
@@ -34,7 +33,10 @@ public class BookController {
     private final UserService userService;
 
     @PostMapping("/add")
-    public ResponseEntity<SuccessResponse<BookResponse>> addNewBook(@ModelAttribute @Valid AddBookRequest request, Principal currentUser) throws IOException {
+    public ResponseEntity<SuccessResponse<BookResponse>> addNewBook(
+            @ModelAttribute @Valid AddBookRequest request,
+            Principal currentUser)
+    {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         return ResponseEntity.ok().body(new SuccessResponse<>(bookService.addNewBook(request, user)));
     }
@@ -70,7 +72,8 @@ public class BookController {
 
     @PutMapping("/change-photo/{id}")
     public ResponseEntity<?> changeBookPhoto(@PathVariable Long id, @RequestParam("photo") MultipartFile photo,
-                                             Principal currentUser) {
+                                             Principal currentUser)
+    {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Book book = bookService.getBookById(id);
         if (bookService.userIsBookOwner(user, book) || (user.getRole().equals(Role.ADMINISTRATOR) || user.getRole().equals(Role.MODERATOR))) {
@@ -88,8 +91,9 @@ public class BookController {
     }
 
     @GetMapping("/get/all")
-    public ResponseEntity<SuccessResponse<Page<BookResponse>>> getAllBooks(@RequestParam(defaultValue = "0") int page,
-                                                                           @RequestParam(defaultValue = "") String keyword)
+    public ResponseEntity<SuccessResponse<Page<BookResponse>>> getAllBooks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "") String keyword)
     {
         Pageable pageable = PageRequest.of(page, 10);
         if (keyword.isEmpty()) {
@@ -109,8 +113,10 @@ public class BookController {
     }
 
     @PostMapping("/get/by/attributes")
-    public ResponseEntity<SuccessResponse<Page<BookResponse>>> getBooksByAttributes(@RequestParam(defaultValue = "0") int page,
-                                                  @RequestBody @Valid FindByAttributesRequest request) {
+    public ResponseEntity<SuccessResponse<Page<BookResponse>>> getBooksByAttributes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestBody @Valid FindByAttributesRequest request)
+    {
         Pageable pageable = PageRequest.of(page, 10);
         return ResponseEntity.ok().body(new SuccessResponse<>(bookService.getAllBooksPagedByAttributes(pageable, request)));
     }
@@ -122,7 +128,8 @@ public class BookController {
 
     @GetMapping("/get/{id}/additional-info")
     public ResponseEntity<SuccessResponse<BookAdditionalInfo>> getBookAdditionalInfo(@PathVariable("id") Long id,
-                                                                                     Principal currentUser) {
+                                                                                     Principal currentUser)
+    {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Book book = bookService.getBookById(id);
         return ResponseEntity.ok().body(new SuccessResponse<>(bookService.getBookAdditionalInfo(user, book)));

@@ -9,6 +9,7 @@ import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.repositoryes.TokenRepository;
 import com.artsolo.bookswap.repositoryes.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -20,7 +21,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -32,23 +36,32 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final EmailSender emailSender;
 
-    public void register(RegisterRequest request) throws IOException {
-        var user = User.builder()
-                .nickname(request.getNickname())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.READER)
-                .activity(Boolean.FALSE)
-                .registrationDate(LocalDate.now())
-                .points(0)
-                .photo(Files.readAllBytes(Paths.get("./src/main/resources/static/default-avatar-icon.jpg")))
-                .country("Unknown")
-                .city("Unknown")
-                .build();
-        var savedUser = userRepository.save(user);
+    public void register(RegisterRequest request) {
+        User user = getUserFromRegisterRequest(request).orElseThrow(() -> new RuntimeException("Error occurred while getting User from request"));
+        User savedUser = userRepository.save(user);
         String jvtToken = jwtService.generateToken(user);
         saveUserToken(savedUser, jvtToken);
         emailSender.sendEmailConfirmation(savedUser.getEmail(), savedUser.getNickname(), jvtToken);
+    }
+
+    public Optional<User> getUserFromRegisterRequest(RegisterRequest request) {
+        try {
+            return Optional.of(User.builder()
+                    .nickname(request.getNickname())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .role(Role.READER)
+                    .activity(Boolean.FALSE)
+                    .registrationDate(LocalDate.now())
+                    .points(0)
+                    .photo(Files.readAllBytes(Paths.get("./src/main/resources/static/default-avatar-icon.jpg")))
+                    .country("Unknown")
+                    .city("Unknown")
+                    .build());
+        } catch (IOException e) {
+            log.error("Error occurred while reading default user photo: {}", e.getMessage());
+            return Optional.empty();
+        }
     }
 
     public boolean isEmailTaken(String email) {
@@ -74,25 +87,19 @@ public class AuthenticationService {
 
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getEmail(),
-                            request.getPassword()
-                    )
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
         } catch (AuthenticationException e) {
-            return AuthenticationResponse.builder()
-                    .build();
+            return AuthenticationResponse.builder().build();
         }
 
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() ->
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
                         new UsernameNotFoundException("User with email " + request.getEmail() + " is not found"));
-        var jvtToken = jwtService.generateToken(user);
+
+        String jvtToken = jwtService.generateToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jvtToken);
-        return AuthenticationResponse.builder()
-                .token(jvtToken)
-                .build();
+        return AuthenticationResponse.builder().token(jvtToken).build();
     }
 
     public String forgotPassword(String email) {
@@ -114,7 +121,7 @@ public class AuthenticationService {
     }
 
     private void revokeAllUserTokens(User user) {
-        var validUserTokens = tokenRepository.findAllValidTokensByUser(user.getId());
+        List<Token> validUserTokens = tokenRepository.findAllValidTokensByUser(user.getId());
         if (validUserTokens.isEmpty()) return;
         validUserTokens.forEach(t -> {
             t.setExpired(true);
@@ -124,7 +131,7 @@ public class AuthenticationService {
     }
 
     private void saveUserToken(User user, String jvtToken) {
-        var token = Token.builder()
+        Token token = Token.builder()
                 .user(user)
                 .token(jvtToken)
                 .revoked(false)

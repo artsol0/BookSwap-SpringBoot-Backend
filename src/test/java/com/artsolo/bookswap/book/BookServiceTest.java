@@ -160,6 +160,49 @@ class BookServiceTest {
     }
 
     @Test
+    void getBookFromAddRequestIsValid() {
+        List<Genre> genres = Arrays.asList(new Genre(1L, "Horror"), new Genre(2L, "Novel"));
+        Quality quality = new Quality(3L, "Bad");
+        Status status = new Status(2L, "Ready");
+        Language language = new Language(2L, "German");
+        MockMultipartFile file = new MockMultipartFile("photo", "some file".getBytes());
+
+        AddBookRequest addBookRequest = new AddBookRequest(
+                "First Book",
+                "First Author",
+                "Long description",
+                List.of(1L, 2L),
+                3L,
+                2L,
+                2L,
+                file
+        );
+
+        when(genreService.getGenreById(anyLong())).thenAnswer(invocation -> {
+            Long id = invocation.getArgument(0);
+            return genres.stream()
+                    .filter(genre -> genre.getId().equals(id))
+                    .findFirst()
+                    .orElse(null);
+        });
+        when(qualityService.getQualityById(3L)).thenReturn(quality);
+        when(statusService.getStatusById(2L)).thenReturn(status);
+        when(languageService.getLanguageById(2L)).thenReturn(language);
+
+        Optional<Book> result = bookService.getBookFromAddRequest(addBookRequest);
+        assertThat(result).isNotNull();
+        assertThat(result.isPresent()).isTrue();
+        assertThat(result.get().getTitle()).isEqualTo(addBookRequest.getTitle());
+        assertThat(result.get().getAuthor()).isEqualTo(addBookRequest.getAuthor());
+        assertThat(result.get().getDescription()).isEqualTo(addBookRequest.getDescription());
+        assertThat(result.get().getGenres()).isEqualTo(genres);
+        assertThat(result.get().getQuality()).isEqualTo(quality);
+        assertThat(result.get().getStatus()).isEqualTo(status);
+        assertThat(result.get().getLanguage()).isEqualTo(language);
+        assertThat(result.get().getPhoto()).isEqualTo("some file".getBytes());
+    }
+
+    @Test
     void ownerWasChanged() {
         User user1 = User.builder().id(5L).build();
         User user2 = User.builder().id(6L).build();
@@ -278,7 +321,7 @@ class BookServiceTest {
         assertThat(response.getQuality()).isEqualTo("Bad");
         assertThat(response.getStatus()).isEqualTo("Ready");
         assertThat(response.getLanguage()).isEqualTo("German");
-        assertThat(response.getPhoto()).isEqualTo("some file".getBytes());
+        assertThat(response.getPhoto()).isEqualTo(book1.getPhoto());
     }
 
     @Test
