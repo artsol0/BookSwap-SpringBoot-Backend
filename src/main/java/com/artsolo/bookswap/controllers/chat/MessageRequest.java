@@ -22,10 +22,6 @@ public class MessageRequest {
     @NotNull(message = "Date can't be null")
     private Date timestamp;
 
-    @NotNull(message = "Sender can't be null")
-    private Long sender_id;
-
     @NotNull(message = "Receiver can't be null")
     private Long receiver_id;
-
 }

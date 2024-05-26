@@ -25,7 +25,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
 @CrossOrigin(origins = "http://localhost:4200")
 public class ChatController {
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -34,8 +33,14 @@ public class ChatController {
     private final UserService userService;
 
     @MessageMapping("/chat")
-    public void sendMessage(@Payload @Valid MessageRequest messageRequest) {
-        ChatMessage savedMsg = chatMessageService.sendMessage(messageRequest);
+    public void sendMessage(@Payload @Valid MessageRequest messageRequest, Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        ChatMessage savedMsg = chatMessageService.sendMessage(messageRequest, user);
+        simpMessagingTemplate.convertAndSendToUser(
+                user.getNickname(),
+                "/queue/messages",
+                chatMessageService.getMessageResponse(savedMsg)
+        );
         simpMessagingTemplate.convertAndSendToUser(
                 userService.getUserById(messageRequest.getReceiver_id()).getNickname(),
                 "/queue/messages",
@@ -44,9 +49,9 @@ public class ChatController {
     }
 
     @GetMapping("/get/chats")
-    public ResponseEntity<List<ChatRoomResponse>> getAllChats(Principal currentUser) {
+    public ResponseEntity<SuccessResponse<List<ChatRoomResponse>>> getAllChats(Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
-        return ResponseEntity.ok(chatRoomService.getChatRooms(user.getId()));
+        return ResponseEntity.ok().body(new SuccessResponse<>(chatRoomService.getChatRooms(user.getId())));
     }
 
     @GetMapping("/messages/{chatId}")
@@ -54,21 +59,23 @@ public class ChatController {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         ChatRoom chatRoom = chatRoomService.getChatRoomById(chatId);
         if (chatRoomService.isUserChatParticipant(chatRoom, user)) {
-            return ResponseEntity.ok(chatMessageService.getChatMessages(chatId));
+            return ResponseEntity.ok().body(new SuccessResponse<>(chatMessageService.getChatMessages(chatId)));
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().error(new ErrorDescription(
                 HttpStatus.FORBIDDEN.value(), "You are not the chat participant to perform this action")).build());
     }
 
     @PostMapping("/add/message")
-    public ResponseEntity<SuccessResponse<String>> addNewMessage(@RequestBody @Valid MessageRequest messageRequest) {
-        ChatMessage savedMsg = chatMessageService.sendMessage(messageRequest);
+    public ResponseEntity<SuccessResponse<String>> addNewMessage(@RequestBody @Valid MessageRequest messageRequest,
+                                                                 Principal currentUser) {
+        User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
+        ChatMessage savedMsg = chatMessageService.sendMessage(messageRequest, user);
         simpMessagingTemplate.convertAndSendToUser(
                 userService.getUserById(messageRequest.getReceiver_id()).getNickname(),
                 "/queue/messages",
                 chatMessageService.getMessageResponse(savedMsg)
         );
-        return ResponseEntity.ok(new SuccessResponse<>("Message has been sent"));
+        return ResponseEntity.ok().body(new SuccessResponse<>("Message has been sent"));
     }
 
 }

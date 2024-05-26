@@ -71,12 +71,12 @@ public class ReviewService {
         return !reviewRepository.existsById(review.getReviewId());
     }
 
-    public boolean reviewIsExist(Long userId, Long bookId) {
+    public boolean isReviewExist(Long userId, Long bookId) {
         CompositeKey compositeKey = new CompositeKey(userId, bookId);
         return reviewRepository.existsById(compositeKey);
     }
 
-    public boolean userIsReviewWriter(User user, Review review) {
+    public boolean isUserReviewWriter(User user, Review review) {
         return review.getUser().getId().equals(user.getId());
     }
 }

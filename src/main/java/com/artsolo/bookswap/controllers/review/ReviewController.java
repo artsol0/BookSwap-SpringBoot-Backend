@@ -63,7 +63,7 @@ public class ReviewController {
 
     @GetMapping("/exist/{userId}/{bookId}")
     public ResponseEntity<SuccessResponse<Boolean>> getReviewExistence(@PathVariable Long userId, @PathVariable Long bookId) {
-        return ResponseEntity.ok().body(new SuccessResponse<>(reviewService.reviewIsExist(userId, bookId)));
+        return ResponseEntity.ok().body(new SuccessResponse<>(reviewService.isReviewExist(userId, bookId)));
     }
 
     @PutMapping("/update/{userId}/{bookId}")
@@ -71,7 +71,7 @@ public class ReviewController {
                                               @RequestBody @Valid ReviewRequest request, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Review review = reviewService.getReviewById(userId, bookId);
-        if (reviewService.userIsReviewWriter(user, review) || (user.getRole().equals(Role.ADMINISTRATOR) ||
+        if (reviewService.isUserReviewWriter(user, review) || (user.getRole().equals(Role.ADMINISTRATOR) ||
                 user.getRole().equals(Role.MODERATOR))) {
                 reviewService.updateReview(review, request.getRating(), request.getReview());
                 return ResponseEntity.ok().body(MessageResponse.builder().message("Review was updated").build());
@@ -85,7 +85,7 @@ public class ReviewController {
                                               Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Review review = reviewService.getReviewById(userId, bookId);
-        if (reviewService.userIsReviewWriter(user, review) || user.getRole().equals(Role.ADMINISTRATOR)) {
+        if (reviewService.isUserReviewWriter(user, review) || user.getRole().equals(Role.ADMINISTRATOR)) {
             if (reviewService.deleteRevive(review)) {
                 return ResponseEntity.ok().body(MessageResponse.builder().message("Review was deleted successfully").build());
             }

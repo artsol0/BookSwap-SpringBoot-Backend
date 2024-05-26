@@ -2,7 +2,9 @@ package com.artsolo.bookswap.services;
 
 import com.artsolo.bookswap.controllers.chat.MessageRequest;
 import com.artsolo.bookswap.controllers.chat.MessageResponse;
+import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.models.ChatMessage;
+import com.artsolo.bookswap.models.User;
 import com.artsolo.bookswap.repositoryes.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
@@ -17,18 +19,17 @@ public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomService chatRoomService;
-    private final UserService userService;
     private final TextEncryptor textEncryptor;
 
-    public ChatMessage sendMessage(MessageRequest messageRequest) {
+    public ChatMessage sendMessage(MessageRequest messageRequest, User sender) {
         Long chatId = chatRoomService.getChatRoomId(
-                messageRequest.getSender_id(),
+                sender.getId(),
                 messageRequest.getReceiver_id(),
                 true
-        ).orElseThrow(); // TODO: create new exception
+        ).orElseThrow(() -> new NoDataFoundException("Chat room", sender.getId(), messageRequest.getReceiver_id()));
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoomService.getChatRoomById(chatId))
-                .sender(userService.getUserById(messageRequest.getSender_id()))
+                .sender(sender)
                 .content(textEncryptor.encrypt(messageRequest.getContent()))
                 .timestamp(messageRequest.getTimestamp())
                 .build();
