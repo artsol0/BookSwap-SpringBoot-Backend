@@ -1,11 +1,8 @@
 package com.artsolo.bookswap.note;
 
-import com.artsolo.bookswap.controllers.note.NoteResponse;
-import com.artsolo.bookswap.models.Book;
-import com.artsolo.bookswap.models.Note;
-import com.artsolo.bookswap.models.User;
-import com.artsolo.bookswap.repositoryes.NoteRepository;
-import com.artsolo.bookswap.services.NoteService;
+import com.artsolo.bookswap.book.Book;
+import com.artsolo.bookswap.note.dto.NoteResponse;
+import com.artsolo.bookswap.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

@@ -1,9 +1,7 @@
 package com.artsolo.bookswap.book;
 
-import com.artsolo.bookswap.models.Book;
-import com.artsolo.bookswap.models.User;
-import com.artsolo.bookswap.repositoryes.BookRepository;
-import com.artsolo.bookswap.repositoryes.UserRepository;
+import com.artsolo.bookswap.user.User;
+import com.artsolo.bookswap.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

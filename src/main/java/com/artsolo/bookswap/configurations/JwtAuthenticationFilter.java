@@ -1,9 +1,9 @@
 package com.artsolo.bookswap.configurations;
 
-import com.artsolo.bookswap.controllers.responses.ErrorDescription;
-import com.artsolo.bookswap.controllers.responses.ErrorResponse;
-import com.artsolo.bookswap.repositoryes.TokenRepository;
-import com.artsolo.bookswap.services.JwtService;
+import com.artsolo.bookswap.responses.ErrorDescription;
+import com.artsolo.bookswap.responses.ErrorResponse;
+import com.artsolo.bookswap.token.TokenRepository;
+import com.artsolo.bookswap.token.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;

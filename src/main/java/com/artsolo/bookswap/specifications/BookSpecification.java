@@ -1,6 +1,7 @@
 package com.artsolo.bookswap.specifications;
 
-import com.artsolo.bookswap.models.*;
+import com.artsolo.bookswap.attributes.genre.Genre;
+import com.artsolo.bookswap.book.Book;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;

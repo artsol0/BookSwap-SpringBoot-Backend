@@ -1,7 +1,9 @@
 package com.artsolo.bookswap.repositoryes;
 
-import com.artsolo.bookswap.models.ChatMessage;
-import com.artsolo.bookswap.models.ChatRoom;
+import com.artsolo.bookswap.chat.message.ChatMessage;
+import com.artsolo.bookswap.chat.message.ChatMessageRepository;
+import com.artsolo.bookswap.chat.room.ChatRoom;
+import com.artsolo.bookswap.chat.room.ChatRoomRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

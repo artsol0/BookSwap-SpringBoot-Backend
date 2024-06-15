@@ -1,8 +1,8 @@
 package com.artsolo.bookswap.exceptions;
 
-import com.artsolo.bookswap.controllers.responses.ErrorDescription;
-import com.artsolo.bookswap.controllers.responses.ErrorResponse;
-import com.artsolo.bookswap.controllers.responses.ValidatingErrors;
+import com.artsolo.bookswap.responses.ErrorDescription;
+import com.artsolo.bookswap.responses.ErrorResponse;
+import com.artsolo.bookswap.responses.ValidatingErrors;
 import io.jsonwebtoken.MalformedJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,13 +1,10 @@
 package com.artsolo.bookswap.exchange;
 
-import com.artsolo.bookswap.controllers.exchange.ExchangeResponse;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
-import com.artsolo.bookswap.models.Book;
-import com.artsolo.bookswap.models.Exchange;
-import com.artsolo.bookswap.models.User;
-import com.artsolo.bookswap.repositoryes.ExchangeRepository;
-import com.artsolo.bookswap.services.BookService;
-import com.artsolo.bookswap.services.ExchangeService;
+import com.artsolo.bookswap.book.Book;
+import com.artsolo.bookswap.exchange.dto.ExchangeResponse;
+import com.artsolo.bookswap.user.User;
+import com.artsolo.bookswap.book.BookService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

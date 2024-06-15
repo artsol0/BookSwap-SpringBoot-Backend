@@ -1,7 +1,7 @@
 package com.artsolo.bookswap.configurations;
 
-import com.artsolo.bookswap.repositoryes.TokenRepository;
-import com.artsolo.bookswap.services.JwtService;
+import com.artsolo.bookswap.token.TokenRepository;
+import com.artsolo.bookswap.token.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;

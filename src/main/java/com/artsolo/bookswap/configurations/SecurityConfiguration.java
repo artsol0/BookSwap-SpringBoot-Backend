@@ -1,7 +1,7 @@
 package com.artsolo.bookswap.configurations;
 
-import com.artsolo.bookswap.controllers.responses.ErrorDescription;
-import com.artsolo.bookswap.controllers.responses.ErrorResponse;
+import com.artsolo.bookswap.responses.ErrorDescription;
+import com.artsolo.bookswap.responses.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

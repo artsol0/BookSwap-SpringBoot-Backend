@@ -1,14 +1,17 @@
 package com.artsolo.bookswap.book;
 
-import com.artsolo.bookswap.controllers.book.AddBookRequest;
-import com.artsolo.bookswap.controllers.book.BookResponse;
-import com.artsolo.bookswap.controllers.book.UpdateBookRequest;
+import com.artsolo.bookswap.attributes.genre.GenreService;
+import com.artsolo.bookswap.attributes.language.LanguageService;
+import com.artsolo.bookswap.attributes.quality.QualityService;
+import com.artsolo.bookswap.attributes.status.StatusService;
+import com.artsolo.bookswap.book.dto.AddBookRequest;
+import com.artsolo.bookswap.book.dto.BookResponse;
+import com.artsolo.bookswap.book.dto.UpdateBookRequest;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
-import com.artsolo.bookswap.models.*;
-import com.artsolo.bookswap.repositoryes.BookRepository;
-import com.artsolo.bookswap.repositoryes.ExchangeRepository;
-import com.artsolo.bookswap.repositoryes.WishlistRepository;
-import com.artsolo.bookswap.services.*;
+import com.artsolo.bookswap.exchange.ExchangeRepository;
+import com.artsolo.bookswap.note.NoteService;
+import com.artsolo.bookswap.wishlist.WishlistRepository;
+import com.artsolo.bookswap.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

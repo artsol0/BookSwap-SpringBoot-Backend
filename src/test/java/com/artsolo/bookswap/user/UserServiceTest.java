@@ -1,13 +1,10 @@
 package com.artsolo.bookswap.user;
 
-import com.artsolo.bookswap.controllers.user.LocationChangeRequest;
-import com.artsolo.bookswap.controllers.user.PasswordChangeRequest;
-import com.artsolo.bookswap.controllers.user.UserResponse;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
-import com.artsolo.bookswap.models.User;
-import com.artsolo.bookswap.models.enums.Role;
-import com.artsolo.bookswap.repositoryes.UserRepository;
-import com.artsolo.bookswap.services.UserService;
+import com.artsolo.bookswap.enums.Role;
+import com.artsolo.bookswap.user.dto.LocationChangeRequest;
+import com.artsolo.bookswap.user.dto.PasswordChangeRequest;
+import com.artsolo.bookswap.user.dto.UserResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
