@@ -1,8 +1,12 @@
 package com.artsolo.bookswap.book;
 
+import com.artsolo.bookswap.attributes.genre.Genre;
 import com.artsolo.bookswap.attributes.genre.GenreService;
+import com.artsolo.bookswap.attributes.language.Language;
 import com.artsolo.bookswap.attributes.language.LanguageService;
+import com.artsolo.bookswap.attributes.quality.Quality;
 import com.artsolo.bookswap.attributes.quality.QualityService;
+import com.artsolo.bookswap.attributes.status.Status;
 import com.artsolo.bookswap.attributes.status.StatusService;
 import com.artsolo.bookswap.book.dto.AddBookRequest;
 import com.artsolo.bookswap.book.dto.BookResponse;
@@ -10,6 +14,7 @@ import com.artsolo.bookswap.book.dto.UpdateBookRequest;
 import com.artsolo.bookswap.exceptions.NoDataFoundException;
 import com.artsolo.bookswap.exchange.ExchangeRepository;
 import com.artsolo.bookswap.note.NoteService;
+import com.artsolo.bookswap.user.User;
 import com.artsolo.bookswap.wishlist.WishlistRepository;
 import com.artsolo.bookswap.user.UserService;
 import org.junit.jupiter.api.Test;
