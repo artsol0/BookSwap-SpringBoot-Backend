@@ -12,6 +12,7 @@ import com.artsolo.bookswap.responses.SuccessResponse;
 import com.artsolo.bookswap.user.User;
 import com.artsolo.bookswap.enums.Role;
 import com.artsolo.bookswap.user.UserService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,6 +45,7 @@ public class BookController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @Transactional
     public ResponseEntity<?> deleteBookById(@PathVariable Long id, Principal currentUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
         Book book = bookService.getBookById(id);

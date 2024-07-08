@@ -68,14 +68,12 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Transactional
     public void increaseUserPoints(int number, User user) {
         if (number < 0) throw new IllegalArgumentException("Number can't be negative");
         user.setPoints(user.getPoints() + number);
         userRepository.save(user);
     }
 
-    @Transactional
     public void decreaseUserPoints(int number, User user) {
         if (number < 0) throw new IllegalArgumentException("Number can't be negative");
         user.setPoints(user.getPoints() - number);

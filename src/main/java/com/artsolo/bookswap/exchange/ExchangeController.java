@@ -9,6 +9,7 @@ import com.artsolo.bookswap.book.BookService;
 import com.artsolo.bookswap.exchange.dto.ExchangeResponse;
 import com.artsolo.bookswap.user.UserService;
 import com.artsolo.bookswap.user.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,7 @@ public class ExchangeController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @Transactional
     public ResponseEntity<?> deleteExchangeById(@PathVariable Long id, Principal currentUser) {
         Exchange exchange = exchangeService.getExchangeById(id);
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
@@ -78,6 +80,7 @@ public class ExchangeController {
     }
 
     @PutMapping("/confirm/{id}")
+    @Transactional
     public ResponseEntity<?> confirmExchangeById(@PathVariable Long id, Principal currentUser) {
         Exchange exchange = exchangeService.getExchangeById(id);
         User user = (User) ((UsernamePasswordAuthenticationToken) currentUser).getPrincipal();
