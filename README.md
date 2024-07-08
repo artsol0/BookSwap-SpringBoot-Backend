@@ -50,6 +50,8 @@ Created with [dbdiagram.io](https://dbdiagram.io/d)
 * Java Mail Sender
 * Mockito with JUnit 5
 * Lombok
+* OpenAPI
+* Docker
 
 ### Frontend
 * Angular 17
