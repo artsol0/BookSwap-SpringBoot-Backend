@@ -41,6 +41,10 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION_TIME}
 
+api:
+  location:
+    key: ${API_LOCATION_KEY}
+
 ui:
   app:
     url: ${UI_APP_URL}

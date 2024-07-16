@@ -7,14 +7,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -24,6 +21,9 @@ import java.util.List;
 @Slf4j
 public class LocationService {
 
+    @Value("{api.location.key}")
+    private String apiKey;
+
     private final String baseUrl = "https://api.countrystatecity.in/v1/countries";
     private final HttpHeaders headers = new HttpHeaders();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -31,7 +31,7 @@ public class LocationService {
 
     public LocationService() {
         this.headers.setContentType(MediaType.APPLICATION_JSON);
-        this.headers.set("X-CSCAPI-KEY", getAPIkey());
+        this.headers.set("X-CSCAPI-KEY", apiKey);
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
@@ -79,21 +79,6 @@ public class LocationService {
             log.error("Error processing JSON cities response: {}", e.getMessage());
             return Collections.emptyList();
         }
-    }
-
-    private String getAPIkey() {
-        try {
-            FileReader fileReader = new FileReader("../../key.txt");
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String key = bufferedReader.readLine();
-            bufferedReader.close();
-            return key;
-        } catch (FileNotFoundException e) {
-            log.error("API key file not found: {}", e.getMessage());
-        } catch (IOException e) {
-            log.error("Error occurred while reading API key from file: {}", e.getMessage());
-        }
-        return null;
     }
 
 }
